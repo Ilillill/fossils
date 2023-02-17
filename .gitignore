@@ -1,0 +1,34 @@
+# Ignore log files
+*.log
+
+# Ignore message files created by Django's internationalization framework
+*.pot
+
+# Ignore compiled Python files
+*.pyc
+
+# Ignore Python's cache directory
+__pycache__
+
+# Ignore SQLite database files
+db.sqlite3
+
+# Ignore media files that are uploaded to the server
+media
+
+# Ignore environment variables files
+.env
+
+# Ignore virtual environment directories
+.venv
+env/
+venv/
+ENV/
+
+# Ignore backup directories for virtual environments
+env.bak
+venv.bak/
+
+# Ignore common directory names used for virtual environments
+virt/
+virtual/
