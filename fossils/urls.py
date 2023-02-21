@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 def restricted(request):
@@ -24,5 +26,6 @@ def restricted(request):
 urlpatterns = [
     path('admin/', restricted),
     path('secret_admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path("", include("app_fossils.urls")),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

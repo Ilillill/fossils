@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %} New fossil {% endblock %}
+{% load static %}
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ forms_fossil_add.as_p }}
+    {{ forms_fossil_add.media }}
+    <button class="save btn btn-sm btn-outline-primary" type="submit">Add</button> <a class="btn btn-sm btn-outline-primary" href="{% url 'homepage' %}">Cancel</a>
+</form>
+<br>
+
+{% endblock %}

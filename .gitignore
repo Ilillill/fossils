@@ -1,14 +1,40 @@
+# Ignore database files
+*.db
+*.sqlite3
+
+# Ignore static files
+/staticfiles/
+/static/
+
+# Ignore media files
+/media/
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore environment variables file
+.env
+
+# Ignore local settings file
+local_settings.py
+
+# Ignore IDE configuration files
+.idea/
+.vscode/
+
+# Ignore migration files
+*/migrations/*.py
+*/migrations/*.bak
+*/migrations/*.swp
+*/migrations/*.pyc
+*/migrations/__pycache__/
+
 # Ignore log files
 *.log
 
 # Ignore message files created by Django's internationalization framework
 *.pot
-
-# Ignore compiled Python files
-*.pyc
-
-# Ignore Python's cache directory
-__pycache__
 
 # Ignore SQLite database files
 db.sqlite3
@@ -16,19 +42,19 @@ db.sqlite3
 # Ignore media files that are uploaded to the server
 media
 
-# Ignore environment variables files
-.env
-
 # Ignore virtual environment directories
-.venv
+.venv/
 env/
 venv/
 ENV/
-
-# Ignore backup directories for virtual environments
-env.bak
-venv.bak/
-
-# Ignore common directory names used for virtual environments
 virt/
 virtual/
+env.bak/
+venv.bak/
+
+# Ignore secret key file
+secret_key.txt
+
+# Ignore system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %} New fossil {% endblock %}
+{% load static %}
+{% block content %}
+
+<h2 class="text-center">{{ fossil.fossil_name }}</h2>
+
+<strong>Associated fossils:</strong>
+{% for associated in fossil.associated_fossils.all %}
+    <a class="btn btn-sm btn-outline-primary shadow-sm pt-0 pb-0" href="#" style="font-size: x-small;">{{ associated }}</a>
+{% endfor %}
+<hr>
+
+
+
+{% endblock %}
