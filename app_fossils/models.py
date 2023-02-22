@@ -18,7 +18,7 @@ class DBSpecies(models.Model):
     species_is_archived = models.BooleanField("Species archived", default=False)
 
     def get_absolute_url(self):
-        return reverse('homepage') # once we have a designated page to list all species, we will update this method
+        return reverse('homepage')
 
     def __str__(self):
         return f"{self.species_name}"
@@ -62,7 +62,7 @@ class DBFossil(models.Model):
         EXCELLENT = 'Excellent', 'Excellent'
 
     fossil_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fossil_owner')
-    fossil_species = models.ForeignKey(DBSpecies, on_delete=models.SET_NULL, verbose_name="Species", related_name='species', limit_choices_to={'species_is_archived': False}, null=True)
+    fossil_species = models.ForeignKey(DBSpecies, on_delete=models.SET_NULL, verbose_name="Species", related_name='species', limit_choices_to={'species_is_archived': False}, null=True, blank=True)
     associated_fossils = models.ManyToManyField('self', verbose_name="Associated fossils", blank=True)
 
     fossil_status = models.CharField("Status", max_length=100, choices=FossilstatusChoices.choices, default="Collection")
@@ -74,7 +74,7 @@ class DBFossil(models.Model):
     fossil_is_favourite = models.BooleanField("Add to favourites", default=False)
 
     fossil_age_in_years = models.DecimalField("Age in years", max_digits=15, decimal_places=0, blank=True, null=True)
-    fossil_value = models.DecimalField("Fossil current value", max_digits=8, decimal_places=2, blank=True, null=True)
+    fossil_value = models.DecimalField("Fossil current value", max_digits=12, decimal_places=2, blank=True, null=True)
 
     fossil_condition = models.CharField(max_length=50, choices=FossilConditionChoices.choices, default="Good")
 
@@ -99,7 +99,7 @@ class DBFossil(models.Model):
     fossil_entry_updated = models.DateTimeField(auto_now=True)
 
     def get_absolute_url(self):
-        return reverse('homepage') # once we have a designated page to list all fossils, we will update this method
+        return reverse('homepage')
 
     def __str__(self):
         return f"{self.fossil_name}"
@@ -114,7 +114,7 @@ class DBFossil(models.Model):
     @property
     def fossil_age_mln(self):
         if self.fossil_age_in_years is not None:
-            return f"{float(self.fossil_age_in_years / 1000000):.2f} million years ago"
+            return f"{float(self.fossil_age_in_years / 1000000):.2f} mln years"
         return None
     
     @property

@@ -1,16 +1,73 @@
 {% extends 'base.html' %}
-{% block title %} New fossil {% endblock %}
+{% block title %} {{ fossil.fossil_name }} {% endblock %}
 {% load static %}
 {% block content %}
 
-<h2 class="text-center">{{ fossil.fossil_name }}</h2>
+<h2 class="text-center">{{ fossil.fossil_name }} {% if fossil.fossil_is_favourite %}⭐{% endif %}</h2>
 
-<strong>Associated fossils:</strong>
-{% for associated in fossil.associated_fossils.all %}
-    <a class="btn btn-sm btn-outline-primary shadow-sm pt-0 pb-0" href="#" style="font-size: x-small;">{{ associated }}</a>
-{% endfor %}
-<hr>
+{% if fossil.fossil_image %}
+    <a href="{{ fossil.fossil_image.url }}" target="_blank"><img class="img rounded mb-3" src="{{ fossil.fossil_image.url }}" alt="" style="max-width: 100px; max-height: 100px;"></a>
+{% endif %}
 
+{% if fossil.fossil_image_resized %}
+    <a href="{{ fossil.fossil_image_resized.url }}" target="_blank"><img class="img rounded mb-3" src="{{ fossil.fossil_image_resized.url }}" alt="" style="max-width: 100px; max-height: 100px;"></a>
+{% endif %}
+<br><br>
+{% if fossil.fossil_public_url %}
+    <p><a href="{{ fossil.fossil_public_url.url }}" target="_blank" style="text-decoration: none;">🌐 Website</a></p>
+{% endif %}
 
+<p><strong>Species: </strong><a href="{% if fossil.fossil_species %}{% url 'species-selected' fossil.fossil_species.id %}{% endif %}" style="text-decoration: none;">{{ fossil.fossil_species|default:'-' }}</a></p>
+
+<p><strong>Status: </strong>{{ fossil.fossil_status }}</p>
+
+{% if fossil.fossil_age_in_years %}
+    <p><strong>Age: </strong>{{ fossil.fossil_age_in_years }} year{{ fossil.fossil_age_in_years|pluralize }} ({{ fossil.fossil_age_mln }})</p>
+{% endif %}
+
+<p><strong>Value: </strong>{{ fossil.fossil_value|default:'0' }}</p>
+
+<p><strong>Condition: </strong>{{ fossil.fossil_condition }}</p>
+
+{% if fossil.fossil_date_acquired %}<p><strong>Date acquired: </strong>{{ fossil.fossil_date_acquired|date:'Y.m.d' }} ({{ fossil.fossil_collected_days_ago }} days ago)</p>{% endif %}
+
+{% if fossil.fossil_size %}<p><strong>Size: </strong>{{ fossil.fossil_size }}</p>{% endif %}
+{% if fossil.fossil_weight %}<p><strong>Weight: </strong>{{ fossil.fossil_weight }}</p>{% endif %}
+
+<p><strong>Location: </strong>{{ fossil.fossil_location|default:'' }} 
+    {% if fossil.fossil_location_latitude or fossil.fossil_location_longitude %}
+        ({{ fossil.fossil_location_latitude|default:'' }} {{ fossil.fossil_location_longitude|default:'' }})
+    {% endif %}
+</p>
+
+<p><strong>Collector's details: </strong>{{ fossil.fossil_collector }}</p>
+
+<small>Created: {{ fossil.fossil_entry_created }}<br>Updated: {{ fossil.fossil_entry_updated }}</small>
+
+{% if fossil.associated_fossils.all|length != 0 %}
+    <hr>
+    <div class="container-fluid mb-3"><strong>Associated fossils:</strong>
+        {% for associated in fossil.associated_fossils.all %}
+            <a class="btn btn-sm btn-outline-primary shadow-sm pt-0 pb-0" href="{% url 'fossil-selected' associated.id %}" style="font-size: x-small;">{{ associated }}</a>
+        {% endfor %}
+    </div>
+    <hr>
+{% endif %}
+
+{% if fossil.fossil_description_short %}
+    <div class="container-fluid w-100 border mb-3">
+        <p><strong>Short description: </strong>
+        <small>{{ fossil.fossil_description_short|safe }}</small>
+        </p>
+    </div>
+{% endif %}
+
+{% if fossil.fossil_description_detailed %}
+    <div class="container-fluid w-100 border mb-3">
+        <p><strong>Detailed description: </strong>
+        <small>{{ fossil.fossil_description_detailed|safe }}</small>
+        </p>
+    </div>
+{% endif %}
 
 {% endblock %}

@@ -4,35 +4,36 @@
 {% block content %}
 
 {% if species %}
-<table class="table table-hover table-sm" style="font-size: small;">
-    <thead>
+  <table class="table table-hover table-sm" style="font-size: small;">
+      <thead>
+          <tr>
+              <th class="h3 text-center p-3" scope="col" colspan="4">Species</th>
+          </tr>
         <tr>
-            <th class="h3 text-center p-3" scope="col" colspan="4">Species</th>
+          <th scope="col">Image</th>
+          <th scope="col">Status</th>
+          <th scope="col">Species</th>
+          <th scope="col">Description</th>
         </tr>
-      <tr>
-        <th scope="col">Image</th>
-        <th scope="col">Status</th>
-        <th scope="col">Species</th>
-        <th scope="col">Description</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for specie in species %}
-      <tr>
-        <td><img src="{{ specie.species_image.url }}" alt="" style="max-width: 40px; max-height: 40px;"></td>
-        <td><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="{% if specie.species_is_archived %}red{% else %}green{% endif %}" class="bi bi-circle-fill" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8"/></svg></td>
-        <td><a href="{% url 'species-selected' specie.id %}" style="text-decoration: none;">{{ specie.species_name }}</a></td>
-        <td>{{ specie.species_description|slice:50 }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-<a class="btn btn-sm btn-outline-primary" href="{% url 'species-add' %}">Add your first fossil species</a>
+      </thead>
+      <tbody>
+      {% for specie in species %}
+        <tr>
+          <td><img src="{{ specie.species_image.url }}" alt="" style="max-width: 40px; max-height: 40px;"></td>
+          <td><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="{% if specie.species_is_archived %}red{% else %}green{% endif %}" class="bi bi-circle-fill" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8"/></svg></td>
+          <td><a href="{% url 'species-selected' specie.id %}" style="text-decoration: none;">{{ specie.species_name }}</a></td>
+          <td>{{ specie.species_description|slice:50 }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
 {% endif %}
 
-
+{% if fossils_without_specie %}
+  <strong>Fossils with no species:</strong>
+  {% for fossil in fossils_without_specie %}
+      <a class="btn btn-sm btn-outline-primary shadow-sm pt-0 pb-0" href="{% url 'fossil-selected' fossil.id %}" style="font-size: x-small;">{{ fossil }}</a>
+  {% endfor %}
+{% endif %}
 
 {% endblock %}
-
-

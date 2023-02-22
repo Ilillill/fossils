@@ -77,6 +77,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fossils.wsgi.application'
 
+TINYMCE_DEFAULT_CONFIG = {
+    'selector': 'textarea',
+    'toolbar': "undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | fullscreen | fontselect | fontsizeselect | forecolor backcolor | subscript superscript | removeformat | table | hr",
+    'menubar': True,
+    'forced_root_block': 'div',
+    'plugins': 'table hr image'
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
