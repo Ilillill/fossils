@@ -3,6 +3,10 @@
 {% load static %}
 {% block content %}
 
+<h4 class="text-center"><a href="{% url 'species-update' specie.id %}" style="text-decoration: none;">{{ specie.species_name }}</a></h4>
+
+<p><a class="btn btn-sm btn-outline-danger" href="{% url 'species-delete' specie.id %}">Delete</a></p>
+
 {% for fossil in fossils %}
   <p><a href="{% url 'fossil-selected' fossil.id %}" style="text-decoration: none;">{{ fossil.fossil_name }}</a></p>
 {% endfor %}

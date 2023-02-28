@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %} Update account settings {% endblock %}
+{% load static %}
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="save btn btn-sm btn-outline-primary" type="submit">Update</button>
+</form>
+
+{% endblock %}

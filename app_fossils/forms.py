@@ -1,9 +1,13 @@
 from django import forms
+from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.models import User
 from tinymce.widgets import TinyMCE
+from captcha.fields import CaptchaField
 
-from .models import DBSpecies, DBFossil
+from .models import DBSpecies, DBFossil, Profile
 
 class FormSpecies(forms.ModelForm):
+    captcha = CaptchaField()
     class Meta:
         model = DBSpecies
         fields = "__all__"
@@ -52,3 +56,26 @@ class FormFossil(forms.ModelForm):
         super(FormFossil, self).__init__(*args, **kwargs)
         self.fields['fossil_species'].queryset = DBSpecies.objects.filter(species_owner=user, species_is_archived=False)
         self.fields['associated_fossils'].queryset = DBFossil.objects.filter(fossil_owner=user)
+
+class FormAccount(UserChangeForm):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('password', None)
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+        exclude = ('password', 'password1', 'password2', 'password3')
+
+
+class FormProfile(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+        exclude = ('user', )
+        widgets = {
+            'user_avatar':forms.FileInput(attrs={'class':'form-control'}),
+            'user_additional_email':forms.EmailInput(attrs={'class':'form-control', 'placeholder':'Email'}),
+            'user_website':forms.URLInput(attrs={'class':'form-control', 'placeholder':'Website'})
+        }

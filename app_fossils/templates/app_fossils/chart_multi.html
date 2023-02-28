@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %} Chart multi {% endblock %}
+{% load static %}
+{% block content %}
+
+<canvas id="myChart"></canvas>
+
+<script>
+    var chart_data = {{ chart_data|safe }};
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chart = new Chart(ctx, {
+      type: 'bar',
+      data: chart_data,
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            },
+            id: 'y',
+            position: 'left',
+          }]
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Display oldest, average and youngest age values for each specie'
+            }
+        },
+      }
+    });
+  </script>
+
+{% endblock %}

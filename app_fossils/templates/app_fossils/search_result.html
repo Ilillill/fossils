@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %} Search result {% endblock %}
+{% load static %}
+{% block content %}
+
+
+{% if species_result %}
+    <h3>Species</h3>
+    <ul>
+        {% for specie in species_result %}
+            <li><a href="{% url 'species-selected' specie.id %}">{{ specie.species_name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <small>No result in species</small><br><br>
+{% endif %}
+
+{% if fossils_result %}
+    <h3>Fossils</h3>
+    <ul>
+        {% for fossil in fossils_result %}
+            <li><a href="{% url 'fossil-selected' fossil.id %}">{{ fossil.fossil_name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <small>No result in fossils</small><br><br>
+{% endif %}
+
+{% endblock %}

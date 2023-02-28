@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %} Update {{ fossil_to_update.fossil_name }} {% endblock %}
+{% load static %}
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form_fossil_update.as_p }}
+    {{ form_fossil_update.media }}
+    <button class="save btn btn-sm btn-outline-primary" type="submit">Update</button> <a class="btn btn-sm btn-outline-primary" href="{% url 'fossil-selected' fossil_to_update.id %}">Cancel</a>
+</form>
+
+{% endblock %}

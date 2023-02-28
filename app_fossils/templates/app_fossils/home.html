@@ -18,12 +18,26 @@
       </thead>
       <tbody>
       {% for specie in species %}
-        <tr>
-          <td><img src="{{ specie.species_image.url }}" alt="" style="max-width: 40px; max-height: 40px;"></td>
+        <tr {% if forloop.counter|divisibleby:2 %} style="background: rgb(221, 221, 221);"{% endif %}>
+          <td>{% if specie.species_image %} <img src="{{ specie.species_image.url }}" alt="" style="max-width: 40px; max-height: 40px;">{% endif %}</td>
           <td><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="{% if specie.species_is_archived %}red{% else %}green{% endif %}" class="bi bi-circle-fill" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8"/></svg></td>
-          <td><a href="{% url 'species-selected' specie.id %}" style="text-decoration: none;">{{ specie.species_name }}</a></td>
-          <td>{{ specie.species_description|slice:50 }}</td>
+          <td>{{ forloop.counter }} - <a href="{% url 'species-selected' specie.id %}" style="text-decoration: none;">{{ specie.species_name }}</a></td>
+          <td><a type="button" data-bs-toggle="modal" data-bs-target="#_full_note_{{ forloop.counter }}Modal" style="text-decoration: none;">{{ specie.species_description|slice:50 }}</a></td>
         </tr>
+
+        <div class="modal fade" id="_full_note_{{ forloop.counter }}Modal" tabindex="-1" aria-labelledby="_full_note_{{ forloop.counter }}ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title fs-5" id="_full_note_{{ forloop.counter }}ModalLabel">Description</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                {{ specie.species_description }}
+              </div>
+            </div>
+          </div>
+        </div>
       {% endfor %}
       </tbody>
     </table>
@@ -37,3 +51,5 @@
 {% endif %}
 
 {% endblock %}
+
+

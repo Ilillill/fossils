@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %} Profile {% endblock %}
+{% load static %}
+{% block content %}
+
+<h2>USER MODEL</h2>
+<h5>Fields: </h5>
+<ul>
+    <li>Username: {{ user.username }}</li>
+    <li>Password: {{ user.password|slice:20 }} ...</li>
+    <li>Email: {{ user.email }}</li>
+    <li>First name: {{ user.first_name }}</li>
+    <li>Last name: {{ user.last_name }}</li>
+    <li>Is staff: {% if user.is_staff %} 🟢 {% else %} 🔴 {% endif %}</li>
+    <li>Is active: {% if user.is_active %} 🟢 {% else %} 🔴 {% endif %}</li>
+    <li>Date joined: {{ user.date_joined }}</li>
+    <li>Last login: {{ user.last_login }}</li>
+</ul>
+    
+<h5>Settings:</h5>
+<a href="{% url 'account-update' %}">Update</a><br>
+<small>We don't need password reset form as we use AllAuth in our project!</small>
+
+<br><hr><br>
+
+<h2>CUSTOM PROFILE MODEL</h2>
+<h5>Fields: </h5>
+<ul>
+    <li>User: {{ user.profile.user }}</li>
+    {% if user.profile.user_avatar %}<li>Avatar: <img src="{{ user.profile.user_avatar.url }}" alt="" style="max-width: 70px; max-height: 70px;"></li>{% endif %}
+    <li>Additional email: {{ user.profile.user_additional_email }}</li>
+    <li>Website: <a href="{{ user.profile.user_website.url }}">{{ user.profile.user_website }}</a></li>
+</ul>
+
+<h5>Settings:</h5>
+<a href="{% url 'profile-create_update' %}">
+    {% if user.profile %} Update {% else %} Create {% endif %} profile
+</a><br>
+
+<br><hr><br>
+<h2>AllAuth settings</h2>
+<ul>
+    <li><a href="{% url 'account_signup' %}">Register</a></li>
+    <li><a href="{% url 'account_login' %}">Login</a></li>
+    <li><a href="{% url 'account_logout' %}">Logout</a></li>
+    <li><a href="{% url 'account_reset_password' %}">Reset password</a></li>
+    <li><a href="{% url 'account_email' %}">Update email</a></li>
+</ul>
+
+{% endblock %}
+

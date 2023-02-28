@@ -27,5 +27,6 @@ urlpatterns = [
     path('admin/', restricted),
     path('secret_admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
+    path('captcha/', include('captcha.urls')),
     path("", include("app_fossils.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

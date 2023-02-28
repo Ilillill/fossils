@@ -1,19 +1,51 @@
 <nav class="navbar navbar-expand bg-body-tertiary">
-    <div class="container-fluid">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          {% if user.is_authenticated %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'homepage' %}">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'species-add' %}">Add species</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'fossil-add' %}">Add fossil</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Logout</a></li>
-          {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'homepage' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'species-add' %}">Add species</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'fossil-add' %}">Add fossil</a></li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Charts</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'chart-simple' %}">Simple chart</a></li>
+              <li><a class="dropdown-item" href="{% url 'chart-multi' %}">Multi chart</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Logout</a></li>
+          {% if user_species %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Species</a>
+              <ul class="dropdown-menu">
+                {% for specie in user_species %}
+                  <li><a class="dropdown-item" href="{% url 'species-selected' specie.id %}">{{ specie.species_name }}</a></li>
+                {% endfor %}
+              </ul>
+            </li>
           {% endif %}
         </ul>
-      </div>
+        <form class="d-flex" method="GET" action="{% url 'search-get' %}">
+          {% csrf_token %}
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_get">
+          <button class="btn btn-outline-success" type="submit">Search (GET)</button>
+        </form>
+        <form class="d-flex" method="POST" action="{% url 'search-post' %}">
+          {% csrf_token %}
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_post">
+          <button class="btn btn-outline-success" type="submit">Search (POST)</button>
+        </form>
+        {% else %}
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
+        </ul>
+        {% endif %}
     </div>
-  </nav>
+  </div>
+</nav>

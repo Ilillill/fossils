@@ -125,3 +125,14 @@ class DBFossil(models.Model):
             return None
         
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+    user_avatar = ResizedImageField("Avatar", null=True, blank=True, upload_to="images/", force_format='PNG')
+    user_additional_email = models.EmailField("Additional email, unrelated to authentication settings", max_length=254, blank=True, null=True)
+    user_website = models.URLField("Website", max_length=200, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.user.username)
+
+    def get_absolute_url(self):
+        return reverse('profile')
