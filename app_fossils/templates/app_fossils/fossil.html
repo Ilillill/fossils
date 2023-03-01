@@ -55,6 +55,20 @@
     {% csrf_token %}
     <button class="save btn btn-sm btn-outline-primary" type="submit" name='fossil_favourite'>Favourite (on click)</button>
 </form>
+<br>
+
+
+
+<a class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" href="#collapse_Send_Email" role="button" aria-expanded="false" aria-controls="collapse_Send_Email" style="text-decoration: none;">Send fossil ▼</a>
+<div class="collapse" id="collapse_Send_Email">
+    <div class="card card-body p-1 border-0">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form_send_email.as_p }}
+            <button class="save btn btn-sm btn-outline-primary" type="submit" name='send_email'>Send</button>
+        </form>
+    </div>
+</div>
 
 
 {% if fossil.fossil_image %}

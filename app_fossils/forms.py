@@ -79,3 +79,8 @@ class FormProfile(forms.ModelForm):
             'user_additional_email':forms.EmailInput(attrs={'class':'form-control', 'placeholder':'Email'}),
             'user_website':forms.URLInput(attrs={'class':'form-control', 'placeholder':'Website'})
         }
+
+class FormEmail(forms.Form):
+    email = forms.EmailField()
+    email_note = forms.CharField(widget=forms.Textarea, required=False)
+    include_price = forms.BooleanField(required=False)

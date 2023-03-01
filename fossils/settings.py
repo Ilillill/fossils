@@ -134,6 +134,16 @@ SITE_ID = 1
 
 AXES_FAILURE_LIMIT = 10
 
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = 'Shared Projects APP ⋮ '
+DEFAULT_FROM_EMAIL = 'app@sharedprojects.co.uk'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.ionos.co.uk'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'app@sharedprojects.co.uk'
+EMAIL_HOST_PASSWORD = config('IONOS_PASSWORD')
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 

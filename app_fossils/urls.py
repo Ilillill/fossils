@@ -23,4 +23,5 @@ urlpatterns = [
 
     path('chart_simple/', chart_simple, name='chart-simple'),
     path('chart_multi/', chart_multi, name='chart-multi'),
+
 ]

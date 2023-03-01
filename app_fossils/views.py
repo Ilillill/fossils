@@ -4,9 +4,10 @@ from django.contrib import messages
 from django.db.models import Q
 import json
 from django.db.models import Min, Max, Avg
+from django.core.mail import send_mail
 
 from .models import DBFossil, DBSpecies, Profile
-from .forms import FormSpecies, FormFossil, FormAccount, FormProfile
+from .forms import FormSpecies, FormFossil, FormAccount, FormProfile, FormEmail
 
 @login_required
 def home(request):
@@ -162,11 +163,60 @@ def fossil(request, pk):
             fossil.fossil_is_favourite = True
             messages.success(request, f"{fossil.fossil_name} added to favourites")
         fossil.save()
-        
+
+    if request.method == "POST" and "send_email" in request.POST:
+        form_send_email = FormEmail(request.POST)
+        if form_send_email.is_valid():
+            subject = fossil.fossil_name
+
+            text_note = ''
+            note = form_send_email.cleaned_data['email_note']
+            if note:
+                text_note = f'<p>{text_note}</p>'
+
+            text_price = ''
+            price = form_send_email.cleaned_data['include_price']
+            if price and fossil.fossil_value:
+                text_price = f'<p>{fossil.fossil_value}</p>'
+
+            text_description = ''
+            if fossil.fossil_description_short:
+                text_description += fossil.fossil_description_short
+            if fossil.fossil_description_detailed:
+                text_description += fossil.fossil_description_detailed
+
+            html = f'''
+                    <html>
+                        <body>
+                            <div>
+                            <h1>{subject}</h1>
+                            {note}
+                            {text_price}
+                            {text_description}
+                            </div>
+                        </body>
+                    </html>'''
+            
+            from_email = "app@sharedprojects.co.uk"
+            email = form_send_email.cleaned_data['email']
+            to_email = (email, )
+            try:
+                send_mail(subject=subject, message="", from_email=from_email, recipient_list=to_email, html_message=html)
+                messages.success(request, f"Email to {email} sent successfully.")
+            except Exception as e:
+                messages.error(request, f"Error, email not sent. {e}")
+
+            return redirect('fossil-selected', pk=fossil.id)
+        else:
+            messages.error(request, f"Error, email not sent.")
+            return redirect('fossil-selected', pk=fossil.id)
+    else:
+        form_send_email = FormEmail()
 
     return render(request, 'app_fossils/fossil.html', {
         'fossil': fossil,
         'form_fossil_update': form_fossil_update,
+        'form_send_email': form_send_email,
         })
 
 
