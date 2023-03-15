@@ -5,18 +5,23 @@ from django.db.models import Q
 import json
 from django.db.models import Min, Max, Avg
 from django.core.mail import send_mail
+from django.db.models import Count
 
-from .models import DBFossil, DBSpecies, Profile
-from .forms import FormSpecies, FormFossil, FormAccount, FormProfile, FormEmail
+from .models import DBFossil, DBSpecies
+from .forms import FormSpecies, FormFossil, FormEmail
+
 
 @login_required
 def home(request):
-    species = DBSpecies.objects.filter(species_owner=request.user)
+    user_species = DBSpecies.objects.filter(species_owner=request.user)
+    species = user_species.annotate(num_fossils=Count('species'))
     fossils_without_specie = DBFossil.objects.filter(fossil_owner=request.user, fossil_species__isnull=True)    
     return render(request, 'app_fossils/home.html', {
         'species': species,
         'fossils_without_specie': fossils_without_specie,
+        "nv": "home",
     })
+
 
 @login_required
 def species_add(request):
@@ -29,41 +34,45 @@ def species_add(request):
             new_species.save()
             messages.success(request, f"{new_species.species_name} added successfuly")
             return redirect('homepage')
-    return render(request, "app_fossils/species_add.html", {'form_species_add': forms_species_add,})
+    return render(request, "app_fossils/species_add.html", {'form_species_add': forms_species_add, "nv": "species_add",})
 
-@login_required
-def species_update(request, pk):
-    species_to_update = get_object_or_404(DBSpecies, id=pk)
-    if species_to_update.species_owner != request.user:
-        messages.error(request, "This data belongs to a different user.")
-        return redirect('account_logout')
-    if request.method == "POST":
-        form_species_update = FormSpecies(request.user, request.POST, request.FILES, instance=species_to_update)
-        if form_species_update.is_valid():
-            form_species_update.save(commit=False)
-            form_species_update.species_owner = request.user
-            form_species_update.save()
-            messages.success(request, f"{species_to_update.species_name} updated successfuly")
-            return redirect('homepage')
-    else:
-        form_species_update = FormSpecies(request.user, instance=species_to_update)
+
+# @login_required
+# def species_update(request, pk):
+#     species_to_update = get_object_or_404(DBSpecies, id=pk)
+#     if species_to_update.species_owner != request.user:
+#         messages.error(request, "This data belongs to a different user.")
+#         return redirect('account_logout')
+#     if request.method == "POST":
+#         form_species_update = FormSpecies(request.user, request.POST, request.FILES, instance=species_to_update)
+#         if form_species_update.is_valid():
+#             form_species_update.save(commit=False)
+#             form_species_update.species_owner = request.user
+#             form_species_update.save()
+#             messages.success(request, f"{species_to_update.species_name} updated successfuly")
+#             return redirect('homepage')
+#     else:
+#         form_species_update = FormSpecies(request.user, instance=species_to_update)
     
-    return render(request, 'app_fossils/species_update.html', {
-        'form_species_update': form_species_update,
-        'species_to_update': species_to_update,
-    })
+#     return render(request, 'app_fossils/species_update.html', {
+#         'form_species_update': form_species_update,
+#         'species_to_update': species_to_update,
+#         'nv': 'species_update',
+#     })
 
-@login_required
-def species_delete(request, pk):
-    species_to_delete = get_object_or_404(DBSpecies, id=pk)
-    if species_to_delete.species_owner != request.user:
-        messages.error(request, "This data belongs to a different user.")
-        return redirect('account_logout')
-    if request.method == "POST":
-        species_to_delete.delete()
-        messages.success(request, f"{species_to_delete.species_name} deleted successfully")
-        return redirect('homepage')
-    return render(request, 'app_fossils/species_delete.html', {'species_to_delete': species_to_delete,})
+
+# @login_required
+# def species_delete(request, pk):
+#     species_to_delete = get_object_or_404(DBSpecies, id=pk)
+#     if species_to_delete.species_owner != request.user:
+#         messages.error(request, "This data belongs to a different user.")
+#         return redirect('account_logout')
+#     if request.method == "POST":
+#         species_to_delete.delete()
+#         messages.success(request, f"{species_to_delete.species_name} deleted successfully")
+#         return redirect('homepage')
+#     return render(request, 'app_fossils/species_delete.html', {'species_to_delete': species_to_delete, 'nv': species_delete})
+
 
 @login_required
 def fossil_add(request):
@@ -76,7 +85,8 @@ def fossil_add(request):
             new_fossil.save()
             forms_fossil_add.save_m2m()
             return redirect('fossil-selected', pk=new_fossil.id)
-    return render(request, "app_fossils/fossils_add.html", {'forms_fossil_add': forms_fossil_add,})
+    return render(request, "app_fossils/fossils_add.html", {'forms_fossil_add': forms_fossil_add, "nv": "fossil_add",})
+
 
 @login_required
 def fossil_update(request, pk):
@@ -98,7 +108,9 @@ def fossil_update(request, pk):
     return render(request, 'app_fossils/fossils_update.html', {
         'form_fossil_update': form_fossil_update,
         'fossil_to_update': fossil_to_update,
+        'nv': 'fossil_update'
     })
+
 
 @login_required
 def fossil_delete(request, pk):
@@ -122,15 +134,38 @@ def species(request, pk):
     if request.user != specie.species_owner:
         messages.error(request, "This data belongs to a different user.")
         return redirect('account_logout')
+    
+    if request.method == "POST" and "species_update" in request.POST:
+        form_species_update = FormSpecies(request.user, request.POST, request.FILES, instance=specie)
+        if form_species_update.is_valid():
+            specie = form_species_update.save(commit=False)
+            specie.species_owner = request.user
+            specie.save()
+            messages.success(request, f"{specie.species_name} updated successfully")
+            return redirect('species-selected', pk=pk)
+    else:
+        form_species_update = FormSpecies(request.user, instance=specie)
+
+    if request.method == "POST" and "species_delete" in request.POST:
+        specie.delete()
+        messages.success(request, f"{specie.species_name} deleted successfully")
+        return redirect('homepage')
+
     fossils = DBFossil.objects.filter(fossil_species=specie)
+    total_fossil_value = sum([f.fossil_value for f in fossils if f.fossil_value])
     return render(request, 'app_fossils/species.html', {
         'specie': specie,
         'fossils': fossils,
+        'form_species_update': form_species_update,
+        'total_fossil_value': total_fossil_value,
+        'nv': 'species',
     })
+
 
 @login_required
 def fossil(request, pk):
     fossil = get_object_or_404(DBFossil, id=pk)
+    events = DBEvent.objects.filter(fossils=fossil).distinct()
 
     if fossil.fossil_owner != request.user:
         messages.error(request, "This data belongs to a different user.")
@@ -217,12 +252,21 @@ def fossil(request, pk):
         'fossil': fossil,
         'form_fossil_update': form_fossil_update,
         'form_send_email': form_send_email,
+        'events': events,
+        'nv': 'fossil',
         })
 
+##########################################################
+##########    P R O F I L E    S E C T I O N    ##########
+##########################################################
+
+from .models import Profile
+from .forms import FormAccount, FormProfile
 
 @login_required
 def user_profile(request):
-    return render(request, 'app_fossils/user_profile.html')
+    return render(request, 'app_fossils/user_profile.html', {"nv": "user_profile",})
+
 
 @login_required
 def user_account_update(request):
@@ -235,6 +279,7 @@ def user_account_update(request):
         form = FormAccount(instance=request.user)
 
     return render(request, 'app_fossils/user_account_update.html', {'form': form,})
+
 
 @login_required
 def user_profile_create_update(request):
@@ -255,6 +300,10 @@ def user_profile_create_update(request):
 
     return render(request, 'app_fossils/user_profile_create_update.html', {'form': form, 'option': option,})
 
+########################################################
+##########    S E A R C H    S E C T I O N    ##########
+########################################################
+
 @login_required
 def search_result_get(request):
     species = DBSpecies.objects.filter(species_owner=request.user)
@@ -272,6 +321,7 @@ def search_result_get(request):
         'fossils_result': fossils_result,
         'search_type': 'GET',
     })
+
 
 @login_required
 def search_result_post(request):
@@ -291,6 +341,9 @@ def search_result_post(request):
         'search_type': 'POST',
     })
 
+########################################################
+##########    C H A R T S    S E C T I O N    ##########
+########################################################
 
 @login_required
 def chart_simple(request):
@@ -308,12 +361,13 @@ def chart_simple(request):
             'backgroundColor': '#00ADB5',
             'borderColor': '#EEEEEE',
             'pointBackgroundColor': 'white',
-            'pointBorderColor': '#000000'
+            'pointBorderColor': '#000000',
         }
         ]
     }
 
-    return render(request, 'app_fossils/chart_simple.html', {'chart_data': json.dumps(chart_data)})
+    return render(request, 'app_fossils/chart_simple.html', {'chart_data': json.dumps(chart_data), "nv": "chart_simple",})
+
 
 @login_required
 def chart_multi(request):
@@ -369,4 +423,168 @@ def chart_multi(request):
         ]
     }
 
-    return render(request, 'app_fossils/chart_multi.html', {'chart_data': json.dumps(chart_data)})
+    return render(request, 'app_fossils/chart_multi.html', {'chart_data': json.dumps(chart_data), "nv": "chart_multi",})
+
+################################################################
+##########    G A T H E R I N G S    S E C T I O N    ##########
+################################################################
+
+from .models import DBFossilGathering
+from .forms import FormGathering
+
+@login_required
+def gatherings(request):
+    user_gatherings = DBFossilGathering.objects.filter(gathering_owner=request.user)
+    return render(request, "app_fossils/gatherings.html", {"user_gatherings": user_gatherings, "nv": "gatherings"})
+
+
+@login_required
+def gathering_selected(request, pk):
+    gathering = get_object_or_404(DBFossilGathering, id=pk)
+    fossils = gathering.gathered.all()
+    if request.method == "POST" and "gathering_delete" in request.POST:
+        gathering.delete()
+        messages.success(request, f"{gathering.gathering_name} deleted successfully")
+        return redirect('gatherings')
+    return render(request, "app_fossils/gathering.html", {"gathering": gathering, "fossils": fossils, "nv": "gathering"})
+
+
+@login_required
+def gathering_add(request):
+    form_gathering_add = FormGathering(request.user)
+    if request.method == "POST":
+        form_gathering_add = FormGathering(request.user, request.POST, request.FILES)
+        if form_gathering_add.is_valid():
+            new_gathering = form_gathering_add.save(commit=False)
+            new_gathering.gathering_owner = request.user
+            new_gathering.save()
+            messages.success(request, f"{new_gathering.gathering_name} added successfuly")
+            return redirect('gathering-selected', pk=new_gathering.id)
+    return render(request, "app_fossils/gathering_add.html", {"form_gathering_add": form_gathering_add, "nv": "gathering_add"})
+
+
+@login_required
+def gathering_update(request, pk):
+    gathering_to_update = get_object_or_404(DBFossilGathering, id=pk)
+    if gathering_to_update.gathering_owner != request.user:
+        messages.error(request, "This data belongs to a different user.")
+        return redirect('account_logout')
+    if request.method == "POST":
+        form_gathering_update = FormGathering(request.user, request.POST, request.FILES, instance=gathering_to_update)
+        if form_gathering_update.is_valid():
+            form_gathering_update.save(commit=False)
+            form_gathering_update.gathering_owner = request.user
+            form_gathering_update.save()
+            messages.success(request, f"{gathering_to_update.gathering_name} updated successfuly")
+            return redirect('gathering-selected', pk=gathering_to_update.id)
+    else:
+        form_gathering_update = FormGathering(request.user, instance=gathering_to_update)
+    
+    return render(request, "app_fossils/gathering_update.html", {
+        "form_gathering_update": form_gathering_update,
+        "gathering_to_update": gathering_to_update,
+        "nv": "gathering_update",
+    })
+
+########################################################
+##########    E V E N T S    S E C T I O N    ##########
+########################################################
+
+from .models import DBEvent, FossilEvent
+from .forms import FormEvent, FormFossilEvent, FormFossilReturn
+
+@login_required
+def events(request):
+    events = DBEvent.objects.filter(event_owner=request.user)
+    return render(request, "app_fossils/events.html", {"events": events, "nv": "events"})
+
+
+@login_required
+def event_selected(request, pk):
+    event = get_object_or_404(DBEvent, id=pk)
+    fossils = event.fossil_events.all()
+
+    if request.method == "POST" and "form_delete" in request.POST:
+        event.delete()
+        messages.success(request, 'Fossil return date updated successfully.')
+        return redirect('events')
+    
+    if request.method == "POST" and "form_update" in request.POST:
+        form_event_update = FormEvent(request.user, request.POST, instance=event)
+        if form_event_update.is_valid():
+            form_event_update.save(commit=False)
+            form_event_update.event_owner = request.user
+            form_event_update.save()
+            messages.success(request, 'Event updated successfully.')
+            return redirect('event-selected', pk=pk)
+    else:
+        form_event_update = FormEvent(request.user, instance=event)
+
+    return render(request, "app_fossils/event.html", {"form_event_update": form_event_update,"event": event, "fossils": fossils,})
+
+
+@login_required
+def event_add(request):
+    if request.method == 'POST':
+        event_form = FormEvent(request.user, request.POST)
+        if event_form.is_valid():
+            event = event_form.save(commit=False)
+            event.event_owner = request.user
+            event.save()
+            return redirect('events')
+    else:
+        event_form = FormEvent(request.user)
+    context = {
+        'event_form': event_form,
+    }
+
+    return render(request, 'app_fossils/event_add.html', context)
+
+
+@login_required
+def fossil_event_add(request, pk):
+    event = get_object_or_404(DBEvent, id=pk)
+    if request.method == 'POST':
+        form = FormFossilEvent(request.POST)
+        if form.is_valid():
+            fossil_event = form.save(commit=False)
+            fossil_event.event = event
+            fossil_event.save()
+            return redirect('event-selected', pk=pk)
+    else:
+        form = FormFossilEvent()
+    return render(request, 'app_fossils/fossil_event_add.html', {'form': form, 'event': event})
+
+
+@login_required
+def fossil_event_return(request, pk):
+    fossil_event = get_object_or_404(FossilEvent, pk=pk)
+    if request.method == 'POST':
+        form = FormFossilReturn(request.POST, instance=fossil_event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Fossil return date updated successfully.')
+            return redirect('event-selected', pk=fossil_event.event.pk)
+    else:
+        form = FormFossilReturn(instance=fossil_event)
+
+    return render(request, 'app_fossils/fossil_event_return.html', {'form': form, "fossil_event": fossil_event})
+
+
+@login_required
+def fossil_event_update(request, pk):
+    fossil_event = get_object_or_404(FossilEvent, pk=pk)
+    if request.method == 'POST' and "form_delete" in request.POST:
+        fossil_event.delete()
+        messages.success(request, 'Fossil event deleted successfully.')
+        return redirect('event-selected', pk=fossil_event.event.pk)
+    if request.method == 'POST' and "form_update" in request.POST:
+        form_update = FormFossilEvent(request.POST, instance=fossil_event)
+        if form_update.is_valid():
+            form_update.save()
+            messages.success(request, 'Fossil event updated successfully.')
+            return redirect('event-selected', pk=fossil_event.event.pk)
+    else:
+        form_update = FormFossilEvent(instance=fossil_event)
+
+    return render(request, 'app_fossils/fossil_event_update.html', {'form_update': form_update, "fossil_event": fossil_event})

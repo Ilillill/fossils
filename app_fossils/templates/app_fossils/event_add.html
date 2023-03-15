@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
-{% block title %} New species {% endblock %}
+{% block title %} New event {% endblock %}
 {% load static %}
 {% block content %}
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form_species_add.as_p }}
-    {{ form_species_add.media }}
+    {{ event_form.as_p }}
+    {{ fossil_event_formset.management_form }}
+
+
     <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'homepage' %}">Cancel</a>
-</form>
+  </form>
+
+
 
 {% endblock %}

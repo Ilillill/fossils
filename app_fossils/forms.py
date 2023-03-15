@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from tinymce.widgets import TinyMCE
 from captcha.fields import CaptchaField
 
-from .models import DBSpecies, DBFossil, Profile
+from .models import DBSpecies, DBFossil, Profile, DBFossilGathering, DBEvent, FossilEvent
 
 class FormSpecies(forms.ModelForm):
     captcha = CaptchaField()
@@ -29,6 +29,7 @@ class FormFossil(forms.ModelForm):
         exclude = ("fossil_owner", "fossil_entry_created", "fossil_entry_updated", )
         widgets = {
             'fossil_species':forms.Select(attrs={'class':'form-control'}),
+            'fossil_gathered':forms.Select(attrs={'class':'form-control'}),
             'associated_fossils':forms.SelectMultiple(attrs={'class':'form-control'}),
             'fossil_status':forms.Select(attrs={'class':'form-control'}),
             'fossil_name':forms.TextInput(attrs={'class':'form-control', 'placeholder':'required'}),
@@ -57,6 +58,15 @@ class FormFossil(forms.ModelForm):
         self.fields['fossil_species'].queryset = DBSpecies.objects.filter(species_owner=user, species_is_archived=False)
         self.fields['associated_fossils'].queryset = DBFossil.objects.filter(fossil_owner=user)
 
+class FormEmail(forms.Form):
+    email = forms.EmailField()
+    email_note = forms.CharField(widget=forms.Textarea, required=False)
+    include_price = forms.BooleanField(required=False)
+
+##########################################################
+##########    P R O F I L E    S E C T I O N    ##########
+##########################################################
+
 class FormAccount(UserChangeForm):
     
     def __init__(self, *args, **kwargs):
@@ -80,7 +90,66 @@ class FormProfile(forms.ModelForm):
             'user_website':forms.URLInput(attrs={'class':'form-control', 'placeholder':'Website'})
         }
 
-class FormEmail(forms.Form):
-    email = forms.EmailField()
-    email_note = forms.CharField(widget=forms.Textarea, required=False)
-    include_price = forms.BooleanField(required=False)
+
+################################################################
+##########    G A T H E R I N G S    S E C T I O N    ##########
+################################################################
+
+class FormGathering(forms.ModelForm):
+    class Meta:
+        model = DBFossilGathering
+        fields = "__all__"
+        exclude = ("gathering_owner", 'gathering_slug')
+        widgets = {
+            'gathering_name':forms.TextInput(attrs={'class':'form-control', 'placeholder':'required'}),
+            'gathering_date':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'gathering_image':forms.FileInput(attrs={'class':'form-control'}),
+            'gathering_description':forms.Textarea(attrs={'class':'form-control'}),
+            'gathering_location':forms.TextInput(attrs={'class':'form-control'}),
+            'gathering_location_geological_time':forms.TextInput(attrs={'class':'form-control'}),
+            'gathering_duration': forms.TextInput(attrs={'class': 'form-control'}),
+            'gathering_pdf': forms.FileInput(attrs={'class': 'form-control-file'}),
+        }
+
+    def __init__(self, user, *args, **kwargs):
+        super(FormGathering, self).__init__(*args, **kwargs)
+
+########################################################
+##########    E V E N T S    S E C T I O N    ##########
+########################################################
+
+class FormEvent(forms.ModelForm):
+    class Meta:
+        model = DBEvent
+        fields = ['event_name', 'event_date', 'event_notes']
+        widgets = {
+            'event_name':forms.TextInput(attrs={'class':'form-control', 'placeholder':'required'}),
+            'event_date':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'event_notes': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, user, *args, **kwargs):
+        super(FormEvent, self).__init__(*args, **kwargs)
+
+
+class FormFossilEvent(forms.ModelForm):
+    class Meta:
+        model = FossilEvent
+        fields = ('fossil', 'fossil_lending_date', 'fossil_lending_date_returned', 'fossil_lending_notes')
+
+
+        widgets = {
+            'fossil': forms.Select(attrs={'class': 'form-control'}),
+            'fossil_lending_date':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'fossil_lending_date_returned':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'fossil_lending_notes': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+class FormFossilReturn(forms.ModelForm):
+    class Meta:
+        model = FossilEvent
+        fields = ('fossil_lending_date_returned',)
+
+        widgets = {
+            'fossil_lending_date_returned':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+        }

@@ -7,7 +7,7 @@
     {% csrf_token %}
     {{ form_fossil_update.as_p }}
     {{ form_fossil_update.media }}
-    <button class="save btn btn-sm btn-outline-primary" type="submit">Update</button> <a class="btn btn-sm btn-outline-primary" href="{% url 'fossil-selected' fossil_to_update.id %}">Cancel</a>
+    <button class="save btn btn-sm btn-outline-secondary" type="submit">Update</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-selected' fossil_to_update.id %}">Cancel</a>
 </form>
 
 {% endblock %}

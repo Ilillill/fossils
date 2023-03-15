@@ -134,7 +134,6 @@ SITE_ID = 1
 
 AXES_FAILURE_LIMIT = 10
 
-
 ACCOUNT_EMAIL_SUBJECT_PREFIX = 'Shared Projects APP ⋮ '
 DEFAULT_FROM_EMAIL = 'app@sharedprojects.co.uk'
 EMAIL_USE_TLS = True

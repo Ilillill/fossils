@@ -3,73 +3,73 @@
 {% load static %}
 {% block content %}
 
-<h2 class="text-center">{{ fossil.fossil_name }} {% if fossil.fossil_is_favourite %}⭐{% endif %}</h2>
-<p><a class="btn btn-sm btn-outline-primary" href="{% url 'fossil-update' fossil.id %}">Update</a> <a class="btn btn-sm btn-outline-danger" href="{% url 'fossil-delete' fossil.id %}">Delete</a></p>
+<h2 class="text-center mb-4">{{ fossil.fossil_name }} {% if fossil.fossil_is_favourite %}⭐{% endif %}</h2>
+<hr>
 
+<a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-update' fossil.id %}">Update</a>
+<a class="btn btn-sm btn-outline-danger" href="{% url 'fossil-delete' fossil.id %}">Delete</a>
+<a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#Update_Popup_Modal">Update (popup)</a>
 
-<p>
-    <a class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#Update_Popup_Modal">Update (popup)</a>
-    <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete (popup)</a>
-</p>
-        <div class="modal fade" id="Update_Popup_Modal" tabindex="-1" aria-labelledby="Update_Popup_ModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h4 class="modal-title fs-5" id="Update_Popup_ModalLabel">Update {{ fossil.fossil_name }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form_fossil_update.as_p }}
-                        {{ form_fossil_update.media }}
-                        <button class="save btn btn-sm btn-outline-primary" type="submit" name='fossil_update'>Update</button> <a class="btn btn-sm btn-outline-primary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
-                    </form>
-                </div>
+    <div class="modal fade" id="Update_Popup_Modal" tabindex="-1" aria-labelledby="Update_Popup_ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h4 class="modal-title fs-5" id="Update_Popup_ModalLabel">Update {{ fossil.fossil_name }}</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            </div>
-        </div>    
-
-        <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ fossil.fossil_name }}</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-danger" role="alert">
-                        <strong>Are you sure you want to delete this fossil?</strong>
-                        <br><br>{{ fossil.fossil_name }}
-                    </div>
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <button class="save btn btn-sm btn-outline-danger" type="submit" name='fossil_delete'>Delete</button> <a class="btn btn-sm btn-outline-primary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
-                    </form>
-                </div>
-                </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form_fossil_update.as_p }}
+                    {{ form_fossil_update.media }}
+                    <button class="save btn btn-sm btn-outline-secondary" type="submit" name='fossil_update'>Update</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+                </form>
             </div>
         </div>
+        </div>
+    </div>    
 
-<form method="POST">
+<a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete (popup)</a>
+
+    <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ fossil.fossil_name }}</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger text-center" role="alert">
+                    <strong>Are you sure you want to delete this fossil?</strong>
+                    <br><br>{{ fossil.fossil_name }}
+                </div>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <button class="save btn btn-sm btn-outline-danger" type="submit" name='fossil_delete'>Delete</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+
+<form method="POST" class="d-inline">
     {% csrf_token %}
-    <button class="save btn btn-sm btn-outline-primary" type="submit" name='fossil_favourite'>Favourite (on click)</button>
+    <button class="save btn btn-sm btn-outline-secondary" type="submit" name='fossil_favourite'>Favourite (on click)</button>
 </form>
-<br>
 
-
-
-<a class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" href="#collapse_Send_Email" role="button" aria-expanded="false" aria-controls="collapse_Send_Email" style="text-decoration: none;">Send fossil ▼</a>
-<div class="collapse" id="collapse_Send_Email">
+<a class="btn btn-sm btn-outline-secondary d-inline" data-bs-toggle="collapse" href="#collapse_Send_Email" role="button" aria-expanded="false" aria-controls="collapse_Send_Email" style="text-decoration: none;">Send fossil ▼</a>
+<div class="collapse mt-3" id="collapse_Send_Email">
     <div class="card card-body p-1 border-0">
         <form method="POST">
             {% csrf_token %}
             {{ form_send_email.as_p }}
-            <button class="save btn btn-sm btn-outline-primary" type="submit" name='send_email'>Send</button>
+            <button class="save btn btn-sm btn-outline-secondary" type="submit" name='send_email'>Send</button>
         </form>
     </div>
 </div>
 
+<br><hr><br>
 
 {% if fossil.fossil_image %}
     <a href="{{ fossil.fossil_image.url }}" target="_blank"><img class="img rounded mb-3" src="{{ fossil.fossil_image.url }}" alt="" style="max-width: 100px; max-height: 100px;"></a>
@@ -114,7 +114,7 @@
     <hr>
     <div class="container-fluid mb-3"><strong>Associated fossils:</strong>
         {% for associated in fossil.associated_fossils.all %}
-            <a class="btn btn-sm btn-outline-primary shadow-sm pt-0 pb-0" href="{% url 'fossil-selected' associated.id %}" style="font-size: x-small;">{{ associated }}</a>
+            <a class="btn btn-sm btn-outline-secondary shadow-sm pt-0 pb-0" href="{% url 'fossil-selected' associated.id %}" style="font-size: x-small;">{{ associated }}</a>
         {% endfor %}
     </div>
     <hr>
@@ -133,6 +133,23 @@
         <p><strong>Detailed description: </strong>
         <small>{{ fossil.fossil_description_detailed|safe }}</small>
         </p>
+    </div>
+{% endif %}
+
+{% if fossil.fossil_gathered %}
+    <div class="container mt-3">
+        Gathered from: <a href="{% url 'gathering-selected' fossil.fossil_gathered.id %}" style="text-decoration: none;">{{ fossil.fossil_gathered.gathering_name }}</a>
+    </div>
+{% endif %}
+
+{% if events %}
+    <div class="container mt-3">
+        Used in events:
+        <ul>
+            {% for event in events %}
+                <li><a href="{% url 'event-selected' event.id %}" style="text-decoration: none;">{{ event.event_name }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 {% endif %}
 

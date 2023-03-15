@@ -1,3 +1,5 @@
+{% load navbar_tags %}
+
 <nav class="navbar navbar-expand bg-body-tertiary">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -6,20 +8,20 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'homepage' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'species-add' %}">Add species</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'fossil-add' %}">Add fossil</a></li>
-
+          <li class="nav-item"><a class="nav-link {% if nv == 'home' %}active{% endif %}" href="{% url 'homepage' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link {% if nv == 'species_add' %}active{% endif %}" href="{% url 'species-add' %}">➕ species</a></li>
+          <li class="nav-item"><a class="nav-link {% if nv == 'fossil_add' %}active{% endif %}" href="{% url 'fossil-add' %}">➕ fossil</a></li>
+          <li class="nav-item"><a class="nav-link {% if nv == 'gatherings' %}active{% endif %}" href="{% url 'gatherings' %}">Collecting</a></li>
+          <li class="nav-item"><a class="nav-link {% if nv == 'events' %}active{% endif %}" href="{% url 'events' %}">Events</a></li>
+          
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Charts</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'chart-simple' %}">Simple chart</a></li>
-              <li><a class="dropdown-item" href="{% url 'chart-multi' %}">Multi chart</a></li>
+              <li><a class="dropdown-item {% if nv == 'chart_simple' %}active{% endif %}" href="{% url 'chart-simple' %}">Simple chart</a></li>
+              <li><a class="dropdown-item {% if nv == 'chart_multi' %}active{% endif %}" href="{% url 'chart-multi' %}">Multi chart</a></li>
             </ul>
           </li>
 
-          <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Logout</a></li>
           {% if user_species %}
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Species</a>
@@ -30,17 +32,23 @@
               </ul>
             </li>
           {% endif %}
-        </ul>
-        <form class="d-flex" method="GET" action="{% url 'search-get' %}">
-          {% csrf_token %}
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_get">
-          <button class="btn btn-outline-success" type="submit">Search (GET)</button>
-        </form>
-        <form class="d-flex" method="POST" action="{% url 'search-post' %}">
-          {% csrf_token %}
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_post">
-          <button class="btn btn-outline-success" type="submit">Search (POST)</button>
-        </form>
+
+          <li class="nav-item"><a class="nav-link" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">Search</a></li>
+
+
+      </ul>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link rounded shadow {% if nv == 'user_profile' %}btn border-primary{% endif %}" href="{% url 'profile' %}">
+            {% if user.profile.user_avatar %}<img src="{{ user.profile.user_avatar.url }}" alt="" style="max-width: 25px; max-height: 25px;">{% else %}Profile{% endif %}</a></li>
+
+          <li class="nav-item"><a class="nav-link shadow rounded ms-2" href="{% url 'account_logout' %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+              <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+            </svg>
+          </a></li>
+      </ul>
+          
         {% else %}
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
@@ -49,3 +57,22 @@
     </div>
   </div>
 </nav>
+
+
+
+<div class="container">
+<div class="collapse" id="collapseSearch">
+  <div class="card card-body border-0 shadow-sm">
+    <form class="d-flex" method="GET" action="{% url 'search-get' %}">
+      {% csrf_token %}
+      <input class="form-control me-2" type="search" placeholder="Search (GET)" aria-label="Search" name="search_get">
+      <button class="btn btn-outline-secondary" type="submit">Search</button>
+    </form>
+    <form class="d-flex" method="POST" action="{% url 'search-post' %}">
+      {% csrf_token %}
+      <input class="form-control me-2" type="search" placeholder="Search (POST)" aria-label="Search" name="search_post">
+      <button class="btn btn-outline-secondary" type="submit">Search</button>
+    </form>
+  </div>
+</div>
+</div>

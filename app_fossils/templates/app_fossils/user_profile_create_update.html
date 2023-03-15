@@ -6,7 +6,7 @@
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="save btn btn-sm btn-outline-primary" type="submit">{{ option }}</button>
+    <button class="save btn btn-sm btn-outline-secondary" type="submit">{{ option }}</button>
 </form>
 
 {% endblock %}

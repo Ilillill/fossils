@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %} Gatherings {% endblock %}
+{% load static %}
+{% block content %}
+<h2 class="text-center mb-4">Collecting</h2>
+<hr>
+<a class="btn btn-sm btn-outline-secondary" href="{% url 'gathering-add' %}">➕ collecting</a><br>
+<hr>
+{% if user_gatherings %}
+  <table class="table table-hover table-sm table-responsive" style="font-size: small;">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Date</th>
+          <th scope="col">Image</th>
+          <th scope="col">Description</th>
+          <th scope="col">Location</th>
+          <th scope="col">Time</th>
+          <th scope="col">Duration</th>
+          <th scope="col">PDF</th>
+          <th scope="col">Slug</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for gathering in user_gatherings %}
+        <tr>
+          
+          <td><a href="{% url 'gathering-selected' gathering.id %}" style="text-decoration: none;">{{ gathering.gathering_name }}</a></td>
+
+        <td>{{ gathering.gathering_date|date:'Y.m.d' }}</td>
+
+        <td>{% if gathering.gathering_image %}
+          <img src="{{ gathering.gathering_image.url }}" alt="" style="max-width: 30px; max-height: 20px;">
+          {% else %} - {% endif %}</td>
+
+        <td>{{ gathering.gathering_description|default:'-' }}</td>
+        <td>{{ gathering.gathering_location|default:'-' }}</td>
+        <td>{{ gathering.gathering_location_geological_time|default:'-' }}</td>
+        <td>{{ gathering.gathering_duration|default:'-' }}</td>
+        <td>{% if gathering.gathering_pdf %}🟢{% else %}🔴{% endif %}</td>
+        <td>{{ gathering.gathering_slug }}</td>
+
+
+        </tr>
+
+      {% endfor %}
+      </tbody>
+    </table>
+{% endif %}
+
+
+
+{% endblock %}
+
+

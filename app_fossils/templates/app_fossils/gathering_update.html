@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %} Update {{ gathering_to_update.gathering_name }} {% endblock %}
+{% load static %}
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form_gathering_update.as_p }}
+    {{ form_gathering_update.media }}
+    <button class="save btn btn-sm btn-outline-secondary" type="submit">Update</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'gathering-selected' gathering_to_update.id %}">Cancel</a>
+</form>
+
+{% endblock %}

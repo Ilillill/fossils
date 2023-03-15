@@ -4,6 +4,9 @@ from django.urls import reverse
 from django.utils import timezone
 from tinymce.models import HTMLField
 from django_resized import ResizedImageField
+from django.core.validators import FileExtensionValidator
+from django.utils.text import slugify
+
 
 class DBSpecies(models.Model):
     class Meta:
@@ -42,6 +45,34 @@ class DBSpecies(models.Model):
         return DBFossil.objects.filter(fossil_species=self).count()
 
 
+class DBFossilGathering(models.Model):
+    class Meta:
+        ordering = ('-gathering_date', )
+
+    gathering_owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    gathering_name = models.CharField("Name", max_length=250)
+    gathering_date = models.DateField("Date")
+    gathering_image = ResizedImageField("Image", upload_to="images/", null=True, blank=True)
+
+    gathering_description = models.TextField("Description", blank=True) # There is no need to specify null=True for CharField and TextField as if left empty in a form, they will have an empty string
+    gathering_location = models.CharField("Location", max_length=500, blank=True)
+    gathering_location_geological_time = models.CharField("Geological time", max_length=500, blank=True)
+    
+    gathering_duration = models.DurationField("Duration", null=True, blank=True)
+    gathering_pdf = models.FileField("Upload PDF", upload_to='dosuments', null=True, blank=True, validators=[FileExtensionValidator(['pdf'])])
+
+    gathering_slug = models.SlugField("Your unique URL", unique=True)
+
+    def save(self, *args, **kwargs):
+        now = timezone.now().strftime("%Y%m%d%H%M%S")
+        slug = slugify(f"{self.gathering_name}-{self.gathering_owner.id}-{now}")
+        self.gathering_slug = slug
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.gathering_date} | {self.gathering_name}"
+
+
 class DBFossil(models.Model):
     class Meta:
         ordering = ('fossil_name', )
@@ -63,6 +94,7 @@ class DBFossil(models.Model):
 
     fossil_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fossil_owner')
     fossil_species = models.ForeignKey(DBSpecies, on_delete=models.SET_NULL, verbose_name="Species", related_name='species', limit_choices_to={'species_is_archived': False}, null=True, blank=True)
+    fossil_gathered = models.ForeignKey(DBFossilGathering, on_delete=models.SET_NULL, verbose_name="Obtained from fossil collecting event", related_name='gathered', null=True, blank=True) # thanks to using related_name we can get all fossils gathered during this event simply using: fossils = gathering.gathered.all(), there is no need to use select_related: fossils = gathering.gathered.select_related('fossil_gathered').all()
     associated_fossils = models.ManyToManyField('self', verbose_name="Associated fossils", blank=True)
 
     fossil_status = models.CharField("Status", max_length=100, choices=FossilstatusChoices.choices, default="Collection")
@@ -98,9 +130,6 @@ class DBFossil(models.Model):
     fossil_entry_created = models.DateTimeField(auto_now_add=True)
     fossil_entry_updated = models.DateTimeField(auto_now=True)
 
-    def get_absolute_url(self):
-        return reverse('homepage')
-
     def __str__(self):
         return f"{self.fossil_name}"
     
@@ -123,7 +152,45 @@ class DBFossil(models.Model):
             return (timezone.now().date() - self.fossil_date_acquired).days
         except TypeError:
             return None
-        
+
+##############################################################################################
+##########    M A N Y    T O    M A N Y    W I T H    T H R O U G H    M O D E L    ##########
+##############################################################################################
+
+# Many to many relationship between fossils and events, each fossil can be lent to multiple events, and each event can include multiple fossils
+class DBEvent(models.Model):
+    class Meta:
+        ordering = ('-event_date',)
+        verbose_name = "Event"
+
+    event_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_owner')
+    fossils = models.ManyToManyField(DBFossil, through='FossilEvent') # FossilEvent isn't defined yet so we have to use '' to indicate lazy reference
+    event_name = models.CharField("Event name", max_length=500)
+    event_date = models.DateTimeField("Event date")
+    event_notes = models.TextField("Notes", blank=True)
+
+    def __str__(self):
+        return str(self.event_name)
+
+# Through model. For each fossil lending I can add extra information like date of lending and return or notes.
+class FossilEvent(models.Model):
+    class Meta:
+        ordering = ('-fossil_lending_date',)
+        verbose_name = "Lending a fossil"
+        verbose_name_plural = "Lending fossils"
+
+    fossil = models.ForeignKey(DBFossil, on_delete=models.CASCADE)
+    event = models.ForeignKey(DBEvent, on_delete=models.CASCADE, related_name='fossil_events') # related name, so we can access this from DBEvent in an easy way
+    fossil_lending_date = models.DateField("Date")
+    fossil_lending_date_returned = models.DateField("Date fossil returned", null=True, blank=True)
+    fossil_lending_notes = models.TextField("Notes", blank=True)
+
+    def __str__(self):
+        return str(self.fossil_lending_date)
+
+###################################################################
+##########    C U S T O M    U S E R    P R O F I L E    ##########
+###################################################################
 
 class Profile(models.Model):
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
@@ -136,3 +203,4 @@ class Profile(models.Model):
 
     def get_absolute_url(self):
         return reverse('profile')
+    

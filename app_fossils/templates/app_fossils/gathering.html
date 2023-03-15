@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %} {{ gathering.gathering_name }} {% endblock %}
+{% load static %}
+{% block content %}
+
+<a class="btn btn-sm btn-outline-secondary" href="{% url 'gathering-update' gathering.id %}">Update</a>
+<a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete</a>
+
+<br><br>
+
+<div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+      <div class="modal-header">
+          <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ gathering.gathering_name }}</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div class="alert alert-danger text-center" role="alert">
+              <strong>Are you sure you want to delete this gathering?</strong>
+              <br><br>{{ gathering.gathering_name }}
+          </div>
+          <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <button class="save btn btn-sm btn-outline-danger" type="submit" name='gathering_delete'>Delete</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+
+
+<p><strong>Name</strong>: {{ gathering.gathering_name }}</p>
+<p><strong>Date</strong>: {{ gathering.gathering_date }}</p>
+<p><strong>Image</strong>: {% if gathering.gathering_image %}
+  <a href="{{ gathering.gathering_image.url }}" target="_blank" style="text-decoration: none;"><img src="{{ gathering.gathering_image.url }}" alt="" style="max-width: 30px; max-height: 20px;"></a>
+  {% else %} - {% endif %}</p>
+<p><strong>Description</strong>: {{ gathering.gathering_description|default:'-' }}</p>
+<p><strong>Location</strong>: {{ gathering.gathering_location|default:'-' }}</p>
+
+
+<p><strong>Geological Time</strong>: {{ gathering.gathering_location_geological_time|default:'-' }}</p>
+<p><strong>Duration</strong>: {{ gathering.gathering_duration|default:'-' }}</p>
+<p><strong>PDF</strong>: {% if gathering.gathering_pdf %} <a href="{{ gathering.gathering_pdf.url }}" style="text-decoration: none;" target="_blank">⬇️</a> {% else %}🔴{% endif %}</p>
+<p><strong>Slug</strong>: {{ gathering.gathering_slug }}</p>
+
+<p><strong>Fossils gathered:</strong></p>
+
+<ul>
+  {% for fossil in fossils %}
+  <li><a href="{% url 'fossil-selected' fossil.id %}">{{ fossil }}</a></li>
+  {% endfor %}
+</ul>
+
+
+{% endblock %}
+
+
