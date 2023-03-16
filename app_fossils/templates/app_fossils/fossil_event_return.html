@@ -3,10 +3,18 @@
 {% load static %}
 {% block content %}
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="save btn btn-sm btn-outline-secondary" type="submit">Update</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'event-selected' fossil_event.event.id %}">Cancel</a>
-</form>
+<div class="container" style="max-width: 450px;">
+    <div class="card mt-5 text-center">
+      <h5 class="card-header">Return fossil</h5>
+      <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+          <button class="save btn btn-sm btn-outline-secondary" type="submit">Return</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'event-selected' fossil_event.event.id %}">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
 {% endblock %}

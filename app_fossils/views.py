@@ -5,7 +5,7 @@ from django.db.models import Q
 import json
 from django.db.models import Min, Max, Avg
 from django.core.mail import send_mail
-from django.db.models import Count
+from django.core.paginator import Paginator
 
 from .models import DBFossil, DBSpecies
 from .forms import FormSpecies, FormFossil, FormEmail
@@ -14,8 +14,13 @@ from .forms import FormSpecies, FormFossil, FormEmail
 @login_required
 def home(request):
     user_species = DBSpecies.objects.filter(species_owner=request.user)
-    species = user_species.annotate(num_fossils=Count('species'))
-    fossils_without_specie = DBFossil.objects.filter(fossil_owner=request.user, fossil_species__isnull=True)    
+    fossils_without_specie = DBFossil.objects.filter(fossil_owner=request.user, fossil_species__isnull=True)   
+
+    paginator = Paginator(user_species, 2)
+    page = request.GET.get('page')
+    species = paginator.get_page(page)
+
+
     return render(request, 'app_fossils/home.html', {
         'species': species,
         'fossils_without_specie': fossils_without_specie,
@@ -265,40 +270,68 @@ from .forms import FormAccount, FormProfile
 
 @login_required
 def user_profile(request):
-    return render(request, 'app_fossils/user_profile.html', {"nv": "user_profile",})
-
-
-@login_required
-def user_account_update(request):
-    if request.method == "POST":
-        form = FormAccount(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
+    if request.method == "POST" and "django_user_model" in request.POST:
+        form_django_user_model = FormAccount(request.POST, instance=request.user)
+        if form_django_user_model.is_valid():
+            form_django_user_model.save()
             return redirect('profile')
     else:
-        form = FormAccount(instance=request.user)
+        form_django_user_model = FormAccount(instance=request.user)
 
-    return render(request, 'app_fossils/user_account_update.html', {'form': form,})
-
-
-@login_required
-def user_profile_create_update(request):
     # Use Django get_or_create method to handle form submission depending whether the profile already exists or not
     user_profile, created = Profile.objects.get_or_create(user=request.user)
 
-    if request.method == "POST":
-        form = FormProfile(request.POST, request.FILES, instance=user_profile)
-        if form.is_valid():
-            user_profile = form.save(commit=False)
+    if request.method == "POST" and "user_custom_profile" in request.POST:
+        form_custom_profile = FormProfile(request.POST, request.FILES, instance=user_profile)
+        if form_custom_profile.is_valid():
+            user_profile = form_custom_profile.save(commit=False)
             user_profile.user = request.user
             user_profile.save()
             return redirect('profile')
     else:
-        form = FormProfile(instance=user_profile)
+        form_custom_profile = FormProfile(instance=user_profile)
 
     option = 'Update' if not created else 'Create'
 
-    return render(request, 'app_fossils/user_profile_create_update.html', {'form': form, 'option': option,})
+    return render(request, 'app_fossils/user_profile.html', {
+        "form_django_user_model": form_django_user_model,
+        "form_custom_profile": form_custom_profile,
+        "option": option,
+        "nv": "user_profile",
+        })
+
+
+# @login_required
+# def user_account_update(request):
+#     if request.method == "POST":
+#         form = FormAccount(request.POST, instance=request.user)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('profile')
+#     else:
+#         form = FormAccount(instance=request.user)
+
+#     return render(request, 'app_fossils/user_account_update.html', {'form': form,})
+
+
+# @login_required
+# def user_profile_create_update(request):
+#     # Use Django get_or_create method to handle form submission depending whether the profile already exists or not
+#     user_profile, created = Profile.objects.get_or_create(user=request.user)
+
+#     if request.method == "POST":
+#         form = FormProfile(request.POST, request.FILES, instance=user_profile)
+#         if form.is_valid():
+#             user_profile = form.save(commit=False)
+#             user_profile.user = request.user
+#             user_profile.save()
+#             return redirect('profile')
+#     else:
+#         form = FormProfile(instance=user_profile)
+
+#     option = 'Update' if not created else 'Create'
+
+#     return render(request, 'app_fossils/user_profile_create_update.html', {'form': form, 'option': option,})
 
 ########################################################
 ##########    S E A R C H    S E C T I O N    ##########
@@ -435,23 +468,6 @@ from .forms import FormGathering
 @login_required
 def gatherings(request):
     user_gatherings = DBFossilGathering.objects.filter(gathering_owner=request.user)
-    return render(request, "app_fossils/gatherings.html", {"user_gatherings": user_gatherings, "nv": "gatherings"})
-
-
-@login_required
-def gathering_selected(request, pk):
-    gathering = get_object_or_404(DBFossilGathering, id=pk)
-    fossils = gathering.gathered.all()
-    if request.method == "POST" and "gathering_delete" in request.POST:
-        gathering.delete()
-        messages.success(request, f"{gathering.gathering_name} deleted successfully")
-        return redirect('gatherings')
-    return render(request, "app_fossils/gathering.html", {"gathering": gathering, "fossils": fossils, "nv": "gathering"})
-
-
-@login_required
-def gathering_add(request):
-    form_gathering_add = FormGathering(request.user)
     if request.method == "POST":
         form_gathering_add = FormGathering(request.user, request.POST, request.FILES)
         if form_gathering_add.is_valid():
@@ -460,31 +476,84 @@ def gathering_add(request):
             new_gathering.save()
             messages.success(request, f"{new_gathering.gathering_name} added successfuly")
             return redirect('gathering-selected', pk=new_gathering.id)
-    return render(request, "app_fossils/gathering_add.html", {"form_gathering_add": form_gathering_add, "nv": "gathering_add"})
+    else:
+        form_gathering_add = FormGathering(request.user)
+
+    return render(request, "app_fossils/gatherings.html", {
+        "user_gatherings": user_gatherings,
+        "form_gathering_add": form_gathering_add,
+        "nv": "gatherings"
+    })
 
 
 @login_required
-def gathering_update(request, pk):
-    gathering_to_update = get_object_or_404(DBFossilGathering, id=pk)
-    if gathering_to_update.gathering_owner != request.user:
+def gathering_selected(request, pk):
+    gathering = get_object_or_404(DBFossilGathering, id=pk)
+    if gathering.gathering_owner != request.user:
         messages.error(request, "This data belongs to a different user.")
         return redirect('account_logout')
-    if request.method == "POST":
-        form_gathering_update = FormGathering(request.user, request.POST, request.FILES, instance=gathering_to_update)
+
+    fossils = gathering.gathered.all()
+    if request.method == "POST" and "gathering_delete" in request.POST:
+        gathering.delete()
+        messages.success(request, f"{gathering.gathering_name} deleted successfully")
+        return redirect('gatherings')
+    
+    if request.method == "POST" and "gathering_update" in request.POST:
+        form_gathering_update = FormGathering(request.user, request.POST, request.FILES, instance=gathering)
         if form_gathering_update.is_valid():
             form_gathering_update.save(commit=False)
             form_gathering_update.gathering_owner = request.user
             form_gathering_update.save()
-            messages.success(request, f"{gathering_to_update.gathering_name} updated successfuly")
-            return redirect('gathering-selected', pk=gathering_to_update.id)
+            messages.success(request, f"{gathering.gathering_name} updated successfuly")
+            return redirect('gathering-selected', pk=gathering.id)
     else:
-        form_gathering_update = FormGathering(request.user, instance=gathering_to_update)
-    
-    return render(request, "app_fossils/gathering_update.html", {
+        form_gathering_update = FormGathering(request.user, instance=gathering)
+
+    return render(request, "app_fossils/gathering.html", {
+        "gathering": gathering,
+        "fossils": fossils,
         "form_gathering_update": form_gathering_update,
-        "gathering_to_update": gathering_to_update,
-        "nv": "gathering_update",
+        "nv": "gathering"
     })
+
+
+# @login_required
+# def gathering_add(request):
+#     form_gathering_add = FormGathering(request.user)
+#     if request.method == "POST":
+#         form_gathering_add = FormGathering(request.user, request.POST, request.FILES)
+#         if form_gathering_add.is_valid():
+#             new_gathering = form_gathering_add.save(commit=False)
+#             new_gathering.gathering_owner = request.user
+#             new_gathering.save()
+#             messages.success(request, f"{new_gathering.gathering_name} added successfuly")
+#             return redirect('gathering-selected', pk=new_gathering.id)
+#     return render(request, "app_fossils/gathering_add.html", {"form_gathering_add": form_gathering_add, "nv": "gathering_add"})
+
+
+# @login_required
+# def gathering_update(request, pk):
+#     gathering_to_update = get_object_or_404(DBFossilGathering, id=pk)
+#     if gathering_to_update.gathering_owner != request.user:
+#         messages.error(request, "This data belongs to a different user.")
+#         return redirect('account_logout')
+#     if request.method == "POST":
+#         form_gathering_update = FormGathering(request.user, request.POST, request.FILES, instance=gathering_to_update)
+#         if form_gathering_update.is_valid():
+#             form_gathering_update.save(commit=False)
+#             form_gathering_update.gathering_owner = request.user
+#             form_gathering_update.save()
+#             messages.success(request, f"{gathering_to_update.gathering_name} updated successfuly")
+#             return redirect('gathering-selected', pk=gathering_to_update.id)
+#     else:
+#         form_gathering_update = FormGathering(request.user, instance=gathering_to_update)
+    
+#     return render(request, "app_fossils/gathering_update.html", {
+#         "form_gathering_update": form_gathering_update,
+#         "gathering_to_update": gathering_to_update,
+#         "nv": "gathering_update",
+#     })
 
 ########################################################
 ##########    E V E N T S    S E C T I O N    ##########
@@ -496,7 +565,21 @@ from .forms import FormEvent, FormFossilEvent, FormFossilReturn
 @login_required
 def events(request):
     events = DBEvent.objects.filter(event_owner=request.user)
-    return render(request, "app_fossils/events.html", {"events": events, "nv": "events"})
+    if request.method == "POST":
+        form = FormEvent(request.user, request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.event_owner = request.user
+            event.save()
+            messages.success(request, 'New event added successfully.')
+            return redirect('event-selected', pk=event.id)
+    else:
+        form = FormEvent(request.user)
+    return render(request, "app_fossils/events.html", {
+        "events": events,
+        "form": form,
+        "nv": "events"
+    })
 
 
 @login_required
@@ -520,40 +603,43 @@ def event_selected(request, pk):
     else:
         form_event_update = FormEvent(request.user, instance=event)
 
-    return render(request, "app_fossils/event.html", {"form_event_update": form_event_update,"event": event, "fossils": fossils,})
-
-
-@login_required
-def event_add(request):
-    if request.method == 'POST':
-        event_form = FormEvent(request.user, request.POST)
-        if event_form.is_valid():
-            event = event_form.save(commit=False)
-            event.event_owner = request.user
-            event.save()
-            return redirect('events')
-    else:
-        event_form = FormEvent(request.user)
-    context = {
-        'event_form': event_form,
-    }
-
-    return render(request, 'app_fossils/event_add.html', context)
-
-
-@login_required
-def fossil_event_add(request, pk):
-    event = get_object_or_404(DBEvent, id=pk)
-    if request.method == 'POST':
-        form = FormFossilEvent(request.POST)
-        if form.is_valid():
-            fossil_event = form.save(commit=False)
+    if request.method == "POST" and "fossil_add" in request.POST:
+        form_fossil_add = FormFossilEvent(request.user, request.POST)
+        if form_fossil_add.is_valid():
+            fossil_event = form_fossil_add.save(commit=False)
             fossil_event.event = event
             fossil_event.save()
             return redirect('event-selected', pk=pk)
     else:
-        form = FormFossilEvent()
-    return render(request, 'app_fossils/fossil_event_add.html', {'form': form, 'event': event})
+        form_fossil_add = FormFossilEvent(request.user)
+
+    return render(request, "app_fossils/event.html", {
+        "form_event_update": form_event_update,
+        "form_fossil_add": form_fossil_add,
+        "event": event,
+        "fossils": fossils,
+    })
+
+
+@login_required
+def fossil_event_update(request, pk):
+    fossil_event = get_object_or_404(FossilEvent, pk=pk)
+    if request.method == 'POST' and "form_delete" in request.POST:
+        fossil_event.delete()
+        messages.success(request, 'Fossil event deleted successfully.')
+        return redirect('event-selected', pk=fossil_event.event.pk)
+    if request.method == 'POST' and "form_update" in request.POST:
+        form_update = FormFossilEvent(request.user, request.POST, instance=fossil_event)
+        if form_update.is_valid():
+            form_update.save()
+            messages.success(request, 'Fossil event updated successfully.')
+            return redirect('event-selected', pk=fossil_event.event.pk)
+    else:
+        form_update = FormFossilEvent(request.user, instance=fossil_event)
+
+    return render(request, 'app_fossils/fossil_event_update.html', {'form_update': form_update, "fossil_event": fossil_event})
+
+
 
 
 @login_required
@@ -571,20 +657,43 @@ def fossil_event_return(request, pk):
     return render(request, 'app_fossils/fossil_event_return.html', {'form': form, "fossil_event": fossil_event})
 
 
-@login_required
-def fossil_event_update(request, pk):
-    fossil_event = get_object_or_404(FossilEvent, pk=pk)
-    if request.method == 'POST' and "form_delete" in request.POST:
-        fossil_event.delete()
-        messages.success(request, 'Fossil event deleted successfully.')
-        return redirect('event-selected', pk=fossil_event.event.pk)
-    if request.method == 'POST' and "form_update" in request.POST:
-        form_update = FormFossilEvent(request.POST, instance=fossil_event)
-        if form_update.is_valid():
-            form_update.save()
-            messages.success(request, 'Fossil event updated successfully.')
-            return redirect('event-selected', pk=fossil_event.event.pk)
-    else:
-        form_update = FormFossilEvent(instance=fossil_event)
 
-    return render(request, 'app_fossils/fossil_event_update.html', {'form_update': form_update, "fossil_event": fossil_event})
+
+
+
+# @login_required
+# def event_add(request):
+#     if request.method == 'POST':
+#         event_form = FormEvent(request.user, request.POST)
+#         if event_form.is_valid():
+#             event = event_form.save(commit=False)
+#             event.event_owner = request.user
+#             event.save()
+#             return redirect('events')
+#     else:
+#         event_form = FormEvent(request.user)
+#     context = {
+#         'event_form': event_form,
+#     }
+
+#     return render(request, 'app_fossils/event_add.html', context)
+
+
+# @login_required
+# def fossil_event_add(request, pk):
+#     event = get_object_or_404(DBEvent, id=pk)
+#     if request.method == 'POST':
+#         form = FormFossilEvent(request.POST)
+#         if form.is_valid():
+#             fossil_event = form.save(commit=False)
+#             fossil_event.event = event
+#             fossil_event.save()
+#             return redirect('event-selected', pk=pk)
+#     else:
+#         form = FormFossilEvent()
+#     return render(request, 'app_fossils/fossil_event_add.html', {'form': form, 'event': event})
+
+
+
+
+

@@ -3,11 +3,18 @@
 {% load static %}
 {% block content %}
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form_update.as_p }}
-    <button class="save btn btn-sm btn-outline-secondary" type="submit" name='form_update'>Update</button> <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'event-selected' fossil_event.event.id %}">Cancel</a>
-</form>
+<div class="container" style="max-width: 700px;">
+    <div class="card mt-5 text-center">
+        <h5 class="card-header">Update fossil data for {{ fossil_event }} event</h5>
+        <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form_update.as_p }}
+            <button class="save btn btn-sm btn-outline-secondary" type="submit" name='form_update'>Update</button> <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'event-selected' fossil_event.event.id %}">Cancel</a>
+        </form>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -16,10 +23,9 @@
             <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete fossil from this event</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body text-center">
             <div class="alert alert-danger" role="alert">
                 <strong>Are you sure you want to remove {{ fossil_event.fossil.fossil_name }} from this event?</strong>
-
             </div>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -28,5 +34,6 @@
         </div>
         </div>
     </div>
+</div>
 
 {% endblock %}

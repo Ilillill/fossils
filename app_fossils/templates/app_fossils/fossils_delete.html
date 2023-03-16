@@ -3,11 +3,17 @@
 {% load static %}
 {% block content %}
 
-<h1>Delete fossil</h1>
-  <p>Are you sure you want to delete {{ fossil_to_delete.species_name }}?</p>
-  <form method="POST" action="{% url 'fossil-delete' fossil_to_delete.id %}">
-    {% csrf_token %}
-    <button class="save btn btn-sm btn-outline-danger" type="submit">Delete</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-selected' fossil_to_delete.id %}">Cancel</a>
-</form>
+<div class="container" style="max-width: 450px;">
+  <div class="card mt-5 text-center">
+    <h5 class="card-header">Delete {{ fossil_to_delete.fossil_name }}</h5>
+    <div class="card-body">
+      <p class="card-text alert alert-danger">Are you sure you want to delete {{ fossil_to_delete.fossil_name }}?</p>
+      <form method="POST" action="{% url 'fossil-delete' fossil_to_delete.id %}">
+        {% csrf_token %}
+        <button class="save btn btn-sm btn-outline-danger" type="submit">Delete</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-selected' fossil_to_delete.id %}">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

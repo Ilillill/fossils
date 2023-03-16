@@ -33,7 +33,7 @@ class FormFossil(forms.ModelForm):
             'associated_fossils':forms.SelectMultiple(attrs={'class':'form-control'}),
             'fossil_status':forms.Select(attrs={'class':'form-control'}),
             'fossil_name':forms.TextInput(attrs={'class':'form-control', 'placeholder':'required'}),
-            'fossil_description_short':forms.Textarea(attrs={'class':'form-control'}),
+            'fossil_description_short':forms.Textarea(attrs={'class':'form-control', 'data-mce-disabled': 'true'}),
             'fossil_description_detailed':TinyMCE(),
             'fossil_is_favourite':forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'fossil_age_in_years':forms.NumberInput(attrs={'class':'form-control'}),
@@ -144,6 +144,10 @@ class FormFossilEvent(forms.ModelForm):
             'fossil_lending_date_returned':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
             'fossil_lending_notes': forms.Textarea(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, user, *args, **kwargs):
+        super(FormFossilEvent, self).__init__(*args, **kwargs)
+        self.fields['fossil'].queryset = DBFossil.objects.filter(fossil_owner=user)
 
 class FormFossilReturn(forms.ModelForm):
     class Meta:

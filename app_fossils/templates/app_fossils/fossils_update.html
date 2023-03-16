@@ -3,11 +3,18 @@
 {% load static %}
 {% block content %}
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form_fossil_update.as_p }}
-    {{ form_fossil_update.media }}
-    <button class="save btn btn-sm btn-outline-secondary" type="submit">Update</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-selected' fossil_to_update.id %}">Cancel</a>
-</form>
+<div class="container" style="max-width: 700px;">
+    <div class="card mt-3 text-center">
+        <h5 class="card-header">Update {{ fossil_to_update.fossil_name }}</h5>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_fossil_update.as_p }}
+                {{ form_fossil_update.media }}
+                <button class="save btn btn-sm btn-outline-secondary" type="submit">Update</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-selected' fossil_to_update.id %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

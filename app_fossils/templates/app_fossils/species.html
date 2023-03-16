@@ -3,88 +3,80 @@
 {% load static %}
 {% block content %}
 
-<h2 class="text-center mb-4">{{ specie.species_name }}</h2>
-<hr>
-
-
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#Update_Popup_Modal">Update</a>
-
-    <div class="modal fade" id="Update_Popup_Modal" tabindex="-1" aria-labelledby="Update_Popup_ModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h4 class="modal-title fs-5" id="Update_Popup_ModalLabel">Update {{ specie.species_name }}</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form_species_update.as_p }}
-                    {{ form_species_update.media }}
-                    <button class="save btn btn-sm btn-outline-secondary" type="submit" name='species_update'>Update</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
-                </form>
-            </div>
-        </div>
-        </div>
-    </div>    
+  <div class="modal fade" id="Update_Popup_Modal" tabindex="-1" aria-labelledby="Update_Popup_ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h4 class="modal-title fs-5" id="Update_Popup_ModalLabel">Update {{ specie.species_name }}</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <form method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ form_species_update.as_p }}
+                  {{ form_species_update.media }}
+                  <button class="save btn btn-sm btn-outline-secondary" type="submit" name='species_update'>Update</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+              </form>
+          </div>
+      </div>
+      </div>
+  </div>    
 
 <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete</a>
+  <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+          <div class="modal-header">
+              <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ specie.species_name }}</h4>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <div class="alert alert-danger" role="alert">
+                  <strong>Are you sure you want to delete this species?</strong>
+                  <br><br>{{ specie.species_name }}
+              </div>
+              <form method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <button class="save btn btn-sm btn-outline-danger" type="submit" name='species_delete'>Delete</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+              </form>
+          </div>
+          </div>
+      </div>
+  </div>
 
-    <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ specie.species_name }}</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger text-center" role="alert">
-                    <strong>Are you sure you want to delete this species?</strong>
-                    <br><br>{{ specie.species_name }}
-                </div>
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <button class="save btn btn-sm btn-outline-danger" type="submit" name='species_delete'>Delete</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
-                </form>
-            </div>
-            </div>
-        </div>
-    </div>
 <hr>
+
+<h2 class="text-center mb-4">{{ specie.species_name }}</h2>
+
 {% if fossils %}
-<table class="table table-hover table-sm" style="font-size: small;">
-  <thead>
-
-    <tr>
-      <th scope="col">Image</th>
-      <th scope="col">Fossil</th>
-      <th scope="col">Value</th>
-      <th scope="col">Condition</th>
-      <th scope="col">Age</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for fossil in fossils %}
-    <tr>
-      <td>
-        <img {% if fossil.fossil_image_resized %} src="{{ fossil.fossil_image_resized.url }}" {% else %} src="{% static 'project/default.png' %}"{% endif %} alt="" style="max-width: 30px; max-height: 30px;">
-      </td>
-      <td><a href="{% url 'fossil-selected' fossil.id %}" style="text-decoration: none;">{{ fossil.fossil_name }}</a></td>
-      <td>{{ fossil.fossil_value|default:'' }}</td>
-      <td>{{ fossil.fossil_condition }}</td>
-      <td>{{ fossil.fossil_age_mln|default:'' }}</td>
-    </tr>
-
-  {% endfor %}
-  <tr style="font-weight: bold;">
-    <td></td>
-    <td class="text-end">TOTAL</td>
-    <td>{{ total_fossil_value }}</td>
-    <td colspan="2"></td>
-  </tr>
-  </tbody>
-</table>
-
+  <table class="table table-hover table-sm" style="font-size: small;">
+    <thead>
+      <tr>
+        <th scope="col">Image</th>
+        <th scope="col">Fossil</th>
+        <th scope="col">Age</th>
+        <th scope="col">Condition</th>
+        <th scope="col">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fossil in fossils %}
+        <tr>
+          <td style="width: 40px;"><img {% if fossil.fossil_image_resized %} src="{{ fossil.fossil_image_resized.url }}" {% else %} src="{% static 'project/default.png' %}"{% endif %} alt="" style="max-width: 30px; max-height: 30px;"></td>
+          <td><a href="{% url 'fossil-selected' fossil.id %}" style="text-decoration: none;">{{ fossil.fossil_name }}</a></td>
+          <td>{{ fossil.fossil_age_mln|default:'' }}</td>
+          
+          <td>{{ fossil.fossil_condition }}</td>
+          <td>{{ fossil.fossil_value|default:'' }}</td>
+        </tr>
+      {% endfor %}
+      <tr style="font-weight: bold;">
+        <td class="text-end" colspan="4">TOTAL</td>
+        <td>{{ total_fossil_value }}</td>
+      </tr>
+    </tbody>
+  </table>
 {% endif %}
 
 

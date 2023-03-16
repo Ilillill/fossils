@@ -3,12 +3,37 @@
 {% load static %}
 {% block content %}
 
+
+
+
+<a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#AddEventModal">➕ event</a>
+  
+  <div class="modal fade" id="AddEventModal" tabindex="-1" aria-labelledby="AddEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title fs-5" id="AddEventModalLabel">Add a new event</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+        
+        
+            <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<hr>
+
 <h2 class="text-center mb-4">Events</h2>
-<hr>
-
-<a class="btn btn-sm btn-outline-secondary" href="{% url 'event-add' %}">➕ event</a>
-<hr>
-
 
 <table class="table table-hover table-sm" style="font-size: small;">
   <thead>

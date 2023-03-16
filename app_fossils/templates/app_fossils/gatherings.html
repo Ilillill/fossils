@@ -2,10 +2,38 @@
 {% block title %} Gatherings {% endblock %}
 {% load static %}
 {% block content %}
-<h2 class="text-center mb-4">Collecting</h2>
+
+
+
+
+<a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#AddGatheringModal">➕ gathering</a>
+  
+  <div class="modal fade" id="AddGatheringModal" tabindex="-1" aria-labelledby="AddGatheringModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title fs-5" id="AddGatheringModalLabel">Add a new gathering event</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form_gathering_add.as_p }}
+
+      
+            <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
 <hr>
-<a class="btn btn-sm btn-outline-secondary" href="{% url 'gathering-add' %}">➕ collecting</a><br>
-<hr>
+<h2 class="text-center mb-4">Gathering events</h2>
+
+
 {% if user_gatherings %}
   <table class="table table-hover table-sm table-responsive" style="font-size: small;">
       <thead>

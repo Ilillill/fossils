@@ -1,15 +1,33 @@
 {% extends 'base.html' %}
-{% block title %} Event {% endblock %}
+{% block title %} {{ event.event_name }} {% endblock %}
 {% load static %}
 {% block content %}
 
-<a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-event-add' event.id %}">Add fossil</a>
+
+
+<a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#FossilEventAddModal">Add fossil</a>
+  
+  <div class="modal fade" id="FossilEventAddModal" tabindex="-1" aria-labelledby="FossilEventAddModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title fs-5" id="FossilEventAddModalLabel">{{ event.event_name }}: add a fossil</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_fossil_add.as_p }}
+                <button class="save btn btn-sm btn-outline-secondary" type="submit" name='fossil_add'>Add</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#Update_Popup_Modal">Update event</a>
-<a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete event</a>
 
-
-
-</p>
     <div class="modal fade" id="Update_Popup_Modal" tabindex="-1" aria-labelledby="Update_Popup_ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
         <div class="modal-content">
@@ -18,7 +36,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form_event_update.as_p }}
                     <button class="save btn btn-sm btn-outline-secondary" type="submit" name='form_update'>Update</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
@@ -28,18 +46,22 @@
         </div>
     </div>    
 
+<a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete event</a>
+
+
+
 
 
 <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
         <div class="modal-header">
-            <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete event</h4>
+            <h4 class="modal-title fs-5" id="Delete_Popup_ModalLabel">Delete {{ event.event_name }}</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <div class="alert alert-danger text-center" role="alert">
-                <strong>Are you sure you want to delete this event?</strong>
+                <strong>Are you sure you want to delete {{ event.event_name }}?</strong>
 
             </div>
             <form method="POST" enctype="multipart/form-data">
@@ -50,19 +72,21 @@
         </div>
     </div>
 </div>
-<hr>
-<div class="container text-center">
-<h2>{{ event.event_name }}</h2>
-<small>Event date: {{ event.event_date|date:'Y.m.d' }}</small>
-</div>
+
+
 <hr>
 
+<h2 class="text-center">{{ event.event_name }}</h2>
+<p class="text-center mb-4" style="font-size: small;">{{ event.event_date|date:'Y.m.d' }}</p>
 
 
+
+
+{% if fossils %}
 <table class="table table-hover table-sm" style="font-size: small;">
     <thead>
         <tr>
-            <th class="h3 text-center p-3" scope="col" colspan="5">Fossils</th>
+            <th class="h5 text-center p-3" scope="col" colspan="5">Fossils</th>
         </tr>
       <tr>
         <th>Update</th>
@@ -85,10 +109,14 @@
     {% endfor %}
     </tbody>
   </table>
+{% endif %}
 
+
+{% if event.event_notes %}
   <hr>
   <p><strong>Notes</strong>: {{ event.event_notes|linebreaks }}</p>
   <br>
+{% endif %}
 
 
 {% endblock %}

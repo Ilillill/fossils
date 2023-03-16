@@ -3,49 +3,85 @@
 {% load static %}
 {% block content %}
 
-<h2>USER MODEL</h2>
-<h5>Fields: </h5>
+
+<h2 class="text-center mb-4">CUSTOM PROFILE MODEL</h2>
+
+
 <ul>
-    <li>Username: {{ user.username }}</li>
-    <li>Password: {{ user.password|slice:20 }} ...</li>
-    <li>Email: {{ user.email }}</li>
-    <li>First name: {{ user.first_name }}</li>
-    <li>Last name: {{ user.last_name }}</li>
-    <li>Is staff: {% if user.is_staff %} 🟢 {% else %} 🔴 {% endif %}</li>
-    <li>Is active: {% if user.is_active %} 🟢 {% else %} 🔴 {% endif %}</li>
-    <li>Date joined: {{ user.date_joined }}</li>
-    <li>Last login: {{ user.last_login }}</li>
+    <li><strong>User</strong>: {{ user.profile.user }}</li>
+    {% if user.profile.user_avatar %}<li><strong>Avatar</strong>: <img src="{{ user.profile.user_avatar.url }}" alt="" style="max-width: 20px; max-height: 20px;"></li>{% endif %}
+    <li><strong>Additional email</strong>: {{ user.profile.user_additional_email }}</li>
+    {% if user.profile.user_website %}<li><strong>Website</strong>: <a href="{{ user.profile.user_website.url }}">{{ user.profile.user_website }}</a></li>{% endif %}
 </ul>
-    
-<h5>Settings:</h5>
-<a href="{% url 'account-update' %}">Update</a><br>
-<small>We don't need password reset form as we use AllAuth in our project!</small>
+<br>
+<div class="container text-center" style="max-width: 500px">
+    <div class="card">
+        <h5 class="card-header">Update profile</h5>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_custom_profile.as_p }}
+                {{ form_custom_profile.media }}
+                <button class="save btn btn-sm btn-outline-secondary w-100" type="submit" name="user_custom_profile">{{ option }}</button>
+            </form>
+        </div>
+        <div class="card-footer text-muted" style="font-size: x-small;">
+            {% if user.profile %} Profile exists and can be updated {% else %} Profile hasn't been created yet {% endif %}
+        </div>
+    </div>
+</div>
+
+
 
 <br><hr><br>
+<h2 class="text-center mb-4">AllAuth shortcuts</h2>
 
-<h2>CUSTOM PROFILE MODEL</h2>
-<h5>Fields: </h5>
 <ul>
-    <li>User: {{ user.profile.user }}</li>
-    {% if user.profile.user_avatar %}<li>Avatar: <img src="{{ user.profile.user_avatar.url }}" alt="" style="max-width: 70px; max-height: 70px;"></li>{% endif %}
-    <li>Additional email: {{ user.profile.user_additional_email }}</li>
-    <li>Website: <a href="{{ user.profile.user_website.url }}">{{ user.profile.user_website }}</a></li>
+    <li><strong>Register</strong>: <a href="{% url 'account_signup' %}" style="text-decoration: none;">account_signup</a></li>
+    <li><strong>Login</strong>: <a href="{% url 'account_login' %}" style="text-decoration: none;">account_login</a></li>
+    <li><strong>Logout</strong>: <a href="{% url 'account_logout' %}" style="text-decoration: none;">account_logout</a></li>
+    <li><strong>Reset password</strong>: <a href="{% url 'account_reset_password' %}" style="text-decoration: none;">account_reset_password</a></li>
+    <li><strong>Update email</strong>: <a href="{% url 'account_email' %}" style="text-decoration: none;">account_email</a></li>
 </ul>
 
-<h5>Settings:</h5>
-<a href="{% url 'profile-create_update' %}">
-    {% if user.profile %} Update {% else %} Create {% endif %} profile
-</a><br>
 
 <br><hr><br>
-<h2>AllAuth settings</h2>
+<h2 class="text-center mb-4">Built-In Django USER MODEL</h2>
+
 <ul>
-    <li><a href="{% url 'account_signup' %}">Register</a></li>
-    <li><a href="{% url 'account_login' %}">Login</a></li>
-    <li><a href="{% url 'account_logout' %}">Logout</a></li>
-    <li><a href="{% url 'account_reset_password' %}">Reset password</a></li>
-    <li><a href="{% url 'account_email' %}">Update email</a></li>
+    <li><strong>Username</strong>: {{ user.username }}</li>
+    <li><strong>Password</strong>: {{ user.password|slice:20 }} ...</li>
+    <li><strong>Email</strong>: {{ user.email }}</li>
+    <li><strong>First name</strong>: {{ user.first_name }}</li>
+    <li><strong>Last name</strong>: {{ user.last_name }}</li>
+    <li><strong>Is staff</strong>: {% if user.is_staff %} 🟢 {% else %} 🔴 {% endif %}</li>
+    <li><strong>Is active</strong>: {% if user.is_active %} 🟢 {% else %} 🔴 {% endif %}</li>
+    <li><strong>Date joined</strong>: {{ user.date_joined }}</li>
+    <li><strong>Last login</strong>: {{ user.last_login }}</li>
 </ul>
+<br>
+
+<div class="container text-center" style="max-width: 500px">
+    <div class="card">
+        <h5 class="card-header">EDIT</h5>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_django_user_model.as_p }}
+                <button class="save btn btn-sm btn-outline-secondary w-100" type="submit" name="django_user_model">Update</button>
+            </form>
+        </div>
+        <div class="card-footer text-muted" style="font-size: x-small;">
+            As we use the Django AllAuth in our project we do not need the django password reset form.
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
 
 {% endblock %}
 
