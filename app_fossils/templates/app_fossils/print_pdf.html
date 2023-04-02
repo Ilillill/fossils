@@ -1,0 +1,29 @@
+{% extends 'base_clean.html' %}
+{% block title %} Print PDF {% endblock %}
+{% load static %}
+{% block content %}
+
+<h1 class="container text-center">Fossils</h1>
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Age</th>
+        <th scope="col">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for fossil in fossils %}
+            <tr>
+                <td>{{ fossil.fossil_name }}</td>
+                <td>{{ fossil.fossil_age_mln }}</td>
+                <td>{{ fossil.fossil_value|default:'' }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}
+
+

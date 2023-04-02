@@ -58,10 +58,15 @@ class FormFossil(forms.ModelForm):
         self.fields['fossil_species'].queryset = DBSpecies.objects.filter(species_owner=user, species_is_archived=False)
         self.fields['associated_fossils'].queryset = DBFossil.objects.filter(fossil_owner=user)
 
+#################################
+##########    EMAIL    ##########
+#################################
+
 class FormEmail(forms.Form):
-    email = forms.EmailField()
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    subject = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Subject'}))
     email_note = forms.CharField(widget=forms.Textarea, required=False)
-    include_price = forms.BooleanField(required=False)
+    include_price = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input',}))
 
 ##########################################################
 ##########    P R O F I L E    S E C T I O N    ##########
@@ -157,3 +162,18 @@ class FormFossilReturn(forms.ModelForm):
         widgets = {
             'fossil_lending_date_returned':forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
         }
+
+####################################################
+##########    S E L E C T    I M A G E    ##########
+####################################################
+
+from django.utils.html import format_html
+
+class ImageForm(forms.Form):
+    image_choices = (
+        ('Ammonite', format_html('<img src="{}" width="100px">', '/static/app_fossils/images/image_option/ammonite.jpg')),
+        ('Dinosaur', format_html('<img src="{}" width="100px">', '/static/app_fossils/images/image_option/dinosaur.jpg')),
+        ('Fish', format_html('<img src="{}" width="100px">', '/static/app_fossils/images/image_option/fish.jpg')),
+        ('Trillobite', format_html('<img src="{}" width="100px">', '/static/app_fossils/images/image_option/trillobite.jpg')),
+    )
+    selected_image = forms.ChoiceField(choices=image_choices, widget=forms.RadioSelect)

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %} {{ fossil.fossil_name }} {% endblock %}
 {% load static %}
+
 {% block content %}
 
 <a class="btn btn-sm btn-outline-secondary" href="{% url 'fossil-update' fossil.id %}">Update</a>
@@ -60,8 +61,11 @@
     <div class="card card-body p-1 border-0">
         <form method="POST">
             {% csrf_token %}
-            {{ form_send_email.as_p }}
-            <button class="save btn btn-sm btn-outline-secondary" type="submit" name='send_email'>Send</button>
+            <p>{{ form_send_email.email }}</p>
+            <p>{{ form_send_email.subject }}</p>
+            <p>{{ form_send_email.email_note }}</p>
+            <p>{{ form_send_email.include_price }} Include price</p>
+            <button class="save btn btn-sm btn-outline-secondary mt-3" type="submit" name='send_email'>Send</button>
         </form>
     </div>
 </div>

@@ -6,7 +6,7 @@ from tinymce.models import HTMLField
 from django_resized import ResizedImageField
 from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
-
+import datetime
 
 class DBSpecies(models.Model):
     class Meta:
@@ -38,7 +38,11 @@ class DBSpecies(models.Model):
     @property
     def total_fossil_value(self):
         total = DBFossil.objects.filter(fossil_species=self).aggregate(total_value=models.Sum('fossil_value'))['total_value']
-        return total or 0
+        if total:
+            total = round(total, 2)
+        else:
+            total = 0
+        return total
     
     @property
     def calculate_number_of_fossils(self):
@@ -71,6 +75,10 @@ class DBFossilGathering(models.Model):
 
     def __str__(self):
         return f"{self.gathering_date} | {self.gathering_name}"
+    
+    @property
+    def days_ago(self):
+        return (datetime.date.today() - self.gathering_date).days
 
 
 class DBFossil(models.Model):
@@ -105,7 +113,7 @@ class DBFossil(models.Model):
 
     fossil_is_favourite = models.BooleanField("Add to favourites", default=False)
 
-    fossil_age_in_years = models.DecimalField("Age in years", max_digits=15, decimal_places=0, blank=True, null=True)
+    fossil_age_in_years = models.DecimalField("Age in years", max_digits=15, decimal_places=0)
     fossil_value = models.DecimalField("Fossil current value", max_digits=12, decimal_places=2, blank=True, null=True)
 
     fossil_condition = models.CharField(max_length=50, choices=FossilConditionChoices.choices, default="Good")
@@ -203,4 +211,5 @@ class Profile(models.Model):
 
     def get_absolute_url(self):
         return reverse('profile')
-    
+
+

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %} Timeline {% endblock %}
+{% load static %}
+{% block content %}
+
+{% if dates %}
+<div style="position: absolute; left: 50%; font-size: small;">
+    <div style="position: absolute; top: 0; height: {{ div_height }}px; width: 4px; background-color: black;"></div>
+        {% for date in dates %}
+            {% if forloop.counter|divisibleby:2 %}
+
+                <a type="button" data-bs-toggle="modal" data-bs-target="#date{{ forloop.counter }}Modal"><div class="border border-dark rounded bg-white" style="position: absolute; top: {{ date.days_ago }}px; left: -15px; width: 245px;">
+                    <div class="ms-5"><strong>{{ date.gathering_date|date:'Y.m.d' }}</strong><br>{{ date.gathering_name|slice:28 }}</div>
+                </div></a>
+            {% else %}
+            <a type="button" data-bs-toggle="modal" data-bs-target="#date{{ forloop.counter }}Modal"><div class="border border-dark rounded bg-white text-end" style="position: absolute; top: {{ date.days_ago }}px; left: -230px; width: 245px;">
+                    <div class="me-5"><strong>{{ date.gathering_date|date:'Y.m.d' }}</strong><br>{{ date.gathering_name|slice:28 }}</div>
+                </div></a>
+            {% endif %}
+            {% if date == last_item %}
+            <div style="position: absolute; top: {{ div_large }}px;">&nbsp;</div>
+            {% endif %}
+
+            <div class="modal fade" id="date{{ forloop.counter }}Modal" tabindex="-1" aria-labelledby="date{{ forloop.counter }}ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title fs-5" id="date{{ forloop.counter }}ModalLabel">{{ date.gathering_date|date:'Y.m.d' }}</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card text-center">
+
+                        <div class="card-header">
+                            <h5 class="card-title">{{ date.gathering_name }}</h5>
+                        </div>
+                        {% if date.gathering_description %}
+                            <div class="card-body">
+                                {{ date.gathering_description|safe }}
+                            </div>
+                        {% endif %}
+                        <div class="card-footer">
+                            <small class="card-text" style="font-size: small;">{{ date.days_ago }} days ago</small>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+
+
+        {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+

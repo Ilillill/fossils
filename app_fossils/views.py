@@ -6,6 +6,8 @@ import json
 from django.db.models import Min, Max, Avg
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
+from .forms import ImageForm
+from django.http import HttpResponse
 
 from .models import DBFossil, DBSpecies
 from .forms import FormSpecies, FormFossil, FormEmail
@@ -16,10 +18,9 @@ def home(request):
     user_species = DBSpecies.objects.filter(species_owner=request.user)
     fossils_without_specie = DBFossil.objects.filter(fossil_owner=request.user, fossil_species__isnull=True)   
 
-    paginator = Paginator(user_species, 2)
+    paginator = Paginator(user_species, 10)
     page = request.GET.get('page')
     species = paginator.get_page(page)
-
 
     return render(request, 'app_fossils/home.html', {
         'species': species,
@@ -40,43 +41,6 @@ def species_add(request):
             messages.success(request, f"{new_species.species_name} added successfuly")
             return redirect('homepage')
     return render(request, "app_fossils/species_add.html", {'form_species_add': forms_species_add, "nv": "species_add",})
-
-
-# @login_required
-# def species_update(request, pk):
-#     species_to_update = get_object_or_404(DBSpecies, id=pk)
-#     if species_to_update.species_owner != request.user:
-#         messages.error(request, "This data belongs to a different user.")
-#         return redirect('account_logout')
-#     if request.method == "POST":
-#         form_species_update = FormSpecies(request.user, request.POST, request.FILES, instance=species_to_update)
-#         if form_species_update.is_valid():
-#             form_species_update.save(commit=False)
-#             form_species_update.species_owner = request.user
-#             form_species_update.save()
-#             messages.success(request, f"{species_to_update.species_name} updated successfuly")
-#             return redirect('homepage')
-#     else:
-#         form_species_update = FormSpecies(request.user, instance=species_to_update)
-    
-#     return render(request, 'app_fossils/species_update.html', {
-#         'form_species_update': form_species_update,
-#         'species_to_update': species_to_update,
-#         'nv': 'species_update',
-#     })
-
-
-# @login_required
-# def species_delete(request, pk):
-#     species_to_delete = get_object_or_404(DBSpecies, id=pk)
-#     if species_to_delete.species_owner != request.user:
-#         messages.error(request, "This data belongs to a different user.")
-#         return redirect('account_logout')
-#     if request.method == "POST":
-#         species_to_delete.delete()
-#         messages.success(request, f"{species_to_delete.species_name} deleted successfully")
-#         return redirect('homepage')
-#     return render(request, 'app_fossils/species_delete.html', {'species_to_delete': species_to_delete, 'nv': species_delete})
 
 
 @login_required
@@ -156,13 +120,32 @@ def species(request, pk):
         messages.success(request, f"{specie.species_name} deleted successfully")
         return redirect('homepage')
 
-    fossils = DBFossil.objects.filter(fossil_species=specie)
-    total_fossil_value = sum([f.fossil_value for f in fossils if f.fossil_value])
+
+    if 'reset' in request.GET:
+        request.session.pop('current_sort', None)
+        return redirect('species-selected', pk=pk)
+
+    current_sort = request.session.get("current_sort") or "fossil_name"
+
+    if "ordering" in request.GET:
+        ordering = request.GET["ordering"]
+        if ordering == current_sort:
+            ordering = "-" + ordering
+        request.session["current_sort"] = ordering
+    else:
+        ordering = current_sort
+
+    fossils_in_species = DBFossil.objects.filter(fossil_species=specie).order_by(ordering)
+
+    paginator = Paginator(fossils_in_species, 5)
+    page = request.GET.get('page')
+    fossils = paginator.get_page(page)
+
     return render(request, 'app_fossils/species.html', {
         'specie': specie,
         'fossils': fossils,
         'form_species_update': form_species_update,
-        'total_fossil_value': total_fossil_value,
+        'ordering': ordering,
         'nv': 'species',
     })
 
@@ -207,19 +190,23 @@ def fossil(request, pk):
     if request.method == "POST" and "send_email" in request.POST:
         form_send_email = FormEmail(request.POST)
         if form_send_email.is_valid():
-            subject = fossil.fossil_name
 
-            text_note = ''
-            note = form_send_email.cleaned_data['email_note']
-            if note:
-                text_note = f'<p>{text_note}</p>'
+            text_subject = f'{fossil.fossil_name}'
+            subject = form_send_email.cleaned_data['subject']
+            if subject:
+                text_subject = f'{fossil.fossil_name} - {subject}'
 
             text_price = ''
             price = form_send_email.cleaned_data['include_price']
             if price and fossil.fossil_value:
                 text_price = f'<p>{fossil.fossil_value}</p>'
 
-            text_description = ''
+            text_note = ''
+            note = form_send_email.cleaned_data['email_note']
+            if note:
+                text_note = f'<p>{note}</p>'
+
+            text_description = f'{fossil.fossil_name} '
             if fossil.fossil_description_short:
                 text_description += fossil.fossil_description_short
             if fossil.fossil_description_detailed:
@@ -229,9 +216,9 @@ def fossil(request, pk):
                     <html>
                         <body>
                             <div>
-                            <h1>{subject}</h1>
-                            {note}
+                            <h1>{text_subject}</h1>
                             {text_price}
+                            {text_note}
                             {text_description}
                             </div>
                         </body>
@@ -241,7 +228,7 @@ def fossil(request, pk):
             email = form_send_email.cleaned_data['email']
             to_email = (email, )
             try:
-                send_mail(subject=subject, message="", from_email=from_email, recipient_list=to_email, html_message=html)
+                send_mail(subject=text_subject, message="", from_email=from_email, recipient_list=to_email, html_message=html)
                 messages.success(request, f"Email to {email} sent successfully.")
             except Exception as e:
                 messages.error(request, f"Error, email not sent. {e}")
@@ -301,41 +288,10 @@ def user_profile(request):
         })
 
 
-# @login_required
-# def user_account_update(request):
-#     if request.method == "POST":
-#         form = FormAccount(request.POST, instance=request.user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('profile')
-#     else:
-#         form = FormAccount(instance=request.user)
-
-#     return render(request, 'app_fossils/user_account_update.html', {'form': form,})
-
-
-# @login_required
-# def user_profile_create_update(request):
-#     # Use Django get_or_create method to handle form submission depending whether the profile already exists or not
-#     user_profile, created = Profile.objects.get_or_create(user=request.user)
-
-#     if request.method == "POST":
-#         form = FormProfile(request.POST, request.FILES, instance=user_profile)
-#         if form.is_valid():
-#             user_profile = form.save(commit=False)
-#             user_profile.user = request.user
-#             user_profile.save()
-#             return redirect('profile')
-#     else:
-#         form = FormProfile(instance=user_profile)
-
-#     option = 'Update' if not created else 'Create'
-
-#     return render(request, 'app_fossils/user_profile_create_update.html', {'form': form, 'option': option,})
-
 ########################################################
 ##########    S E A R C H    S E C T I O N    ##########
 ########################################################
+
 
 @login_required
 def search_result_get(request):
@@ -374,6 +330,7 @@ def search_result_post(request):
         'search_type': 'POST',
     })
 
+
 ########################################################
 ##########    C H A R T S    S E C T I O N    ##########
 ########################################################
@@ -411,6 +368,7 @@ def chart_multi(request):
         fossils = DBFossil.objects.filter(fossil_species=specie)
 
         youngest_fossil = fossils.filter(fossil_age_in_years=fossils.aggregate(Min('fossil_age_in_years'))['fossil_age_in_years__min'])
+
         if youngest_fossil:
             fossil_ages['youngest'].append(float(youngest_fossil.first().fossil_age_in_years))
         else:
@@ -518,43 +476,6 @@ def gathering_selected(request, pk):
     })
 
 
-# @login_required
-# def gathering_add(request):
-#     form_gathering_add = FormGathering(request.user)
-#     if request.method == "POST":
-#         form_gathering_add = FormGathering(request.user, request.POST, request.FILES)
-#         if form_gathering_add.is_valid():
-#             new_gathering = form_gathering_add.save(commit=False)
-#             new_gathering.gathering_owner = request.user
-#             new_gathering.save()
-#             messages.success(request, f"{new_gathering.gathering_name} added successfuly")
-#             return redirect('gathering-selected', pk=new_gathering.id)
-#     return render(request, "app_fossils/gathering_add.html", {"form_gathering_add": form_gathering_add, "nv": "gathering_add"})
-
-
-# @login_required
-# def gathering_update(request, pk):
-#     gathering_to_update = get_object_or_404(DBFossilGathering, id=pk)
-#     if gathering_to_update.gathering_owner != request.user:
-#         messages.error(request, "This data belongs to a different user.")
-#         return redirect('account_logout')
-#     if request.method == "POST":
-#         form_gathering_update = FormGathering(request.user, request.POST, request.FILES, instance=gathering_to_update)
-#         if form_gathering_update.is_valid():
-#             form_gathering_update.save(commit=False)
-#             form_gathering_update.gathering_owner = request.user
-#             form_gathering_update.save()
-#             messages.success(request, f"{gathering_to_update.gathering_name} updated successfuly")
-#             return redirect('gathering-selected', pk=gathering_to_update.id)
-#     else:
-#         form_gathering_update = FormGathering(request.user, instance=gathering_to_update)
-    
-#     return render(request, "app_fossils/gathering_update.html", {
-#         "form_gathering_update": form_gathering_update,
-#         "gathering_to_update": gathering_to_update,
-#         "nv": "gathering_update",
-#     })
-
 ########################################################
 ##########    E V E N T S    S E C T I O N    ##########
 ########################################################
@@ -640,8 +561,6 @@ def fossil_event_update(request, pk):
     return render(request, 'app_fossils/fossil_event_update.html', {'form_update': form_update, "fossil_event": fossil_event})
 
 
-
-
 @login_required
 def fossil_event_return(request, pk):
     fossil_event = get_object_or_404(FossilEvent, pk=pk)
@@ -657,43 +576,194 @@ def fossil_event_return(request, pk):
     return render(request, 'app_fossils/fossil_event_return.html', {'form': form, "fossil_event": fossil_event})
 
 
+#####################################
+##########    T O O L S    ##########
+#####################################
+
+
+@login_required
+def tools(request):
+    return render(request, 'app_fossils/tools.html', {"nv": "tools"})
+
+
+####################################################
+##########    S E L E C T    I M A G E    ##########
+####################################################
+
+
+@login_required
+def select_image(request):
+    if request.method == 'POST':
+        form = ImageForm(request.POST)
+        if form.is_valid():
+            selected_image = form.cleaned_data['selected_image']
+            messages.success(request, f'You selected {selected_image}')
+    else:
+        form = ImageForm()
+    return render(request, 'app_fossils/select_image.html', {'form': form})
 
 
 
 
-# @login_required
-# def event_add(request):
-#     if request.method == 'POST':
-#         event_form = FormEvent(request.user, request.POST)
-#         if event_form.is_valid():
-#             event = event_form.save(commit=False)
-#             event.event_owner = request.user
-#             event.save()
-#             return redirect('events')
-#     else:
-#         event_form = FormEvent(request.user)
-#     context = {
-#         'event_form': event_form,
-#     }
+def my_text(request):
+    return HttpResponse('Hello, world!')
 
-#     return render(request, 'app_fossils/event_add.html', context)
+def my_html(request):
+    html = '<html><body><h1>Hello, world!</h1></body></html>'
+    return HttpResponse(html)
 
 
-# @login_required
-# def fossil_event_add(request, pk):
-#     event = get_object_or_404(DBEvent, id=pk)
-#     if request.method == 'POST':
-#         form = FormFossilEvent(request.POST)
-#         if form.is_valid():
-#             fossil_event = form.save(commit=False)
-#             fossil_event.event = event
-#             fossil_event.save()
-#             return redirect('event-selected', pk=pk)
-#     else:
-#         form = FormFossilEvent()
-#     return render(request, 'app_fossils/fossil_event_add.html', {'form': form, 'event': event})
+###########################################
+##########    T I M E L I N E    ##########
+###########################################
 
 
+@login_required
+def timeline(request):
+    dates = DBFossilGathering.objects.filter(gathering_owner=request.user).order_by('-gathering_date')
+    last_item = dates.last()
+    div_height = 0
+    if dates:
+        div_height = dates.last().days_ago
+    div_large = div_height+100
+
+    return render(request, "app_fossils/timeline.html", {
+        "dates": dates,
+        'div_height': div_height,
+        "div_large": div_large,
+        'last_item': last_item,
+        "nv":"timeline",
+    })
+
+import csv
+
+@login_required
+def print_csv(request):
+    fossils = DBFossil.objects.filter(fossil_owner=request.user)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="mymodel.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Name', 'Age', 'Value'])
+    for obj in fossils:
+        writer.writerow([obj.fossil_name, obj.fossil_age_mln, obj.fossil_value])
+    return response
+
+@login_required
+def print_pdf(request):
+    fossils = DBFossil.objects.filter(fossil_owner=request.user)
+    return render(request, "app_fossils/print_pdf.html", {"fossils": fossils})
+
+from docx import Document
+from io import BytesIO
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt, Mm
+from docx.enum.style import WD_STYLE_TYPE
+from django.utils.html import strip_tags
+from docx.shared import RGBColor
+import io
+        
+@login_required
+def print_word(request):
+    def print_fossil(selected_fossil):
+        print(selected_fossil)
+        fossil_name_text = document.add_paragraph(f'{selected_fossil.fossil_name}', style='title_style')
+        fossil_name_text.paragraph_format.space_before = Pt(10)
+        fossil_name_text.paragraph_format.space_after = Pt(0)
+        fossil_name_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        table_age_value = document.add_table(rows=2, cols=2)
+        header_cells = table_age_value.rows[0].cells
+        header_cells[0].text = f'Age'
+        header_cells[0].paragraphs[0].style='big_header_style'
+        header_cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        header_cells[0].paragraphs[0].paragraph_format.space_before = Pt(0)
+        header_cells[0].paragraphs[0].paragraph_format.space_after = Pt(10)
+        header_cells[1].text = f'Value'
+        header_cells[1].paragraphs[0].style='big_header_style'
+        header_cells[1].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        header_cells[1].paragraphs[0].paragraph_format.space_before = Pt(0)
+        header_cells[1].paragraphs[0].paragraph_format.space_after = Pt(10)
+
+        address_cells = table_age_value.rows[1].cells
+        add_age = '-'
+        if selected_fossil.fossil_age_mln:
+            add_age = selected_fossil.fossil_age_mln
+        address_cells[0].text = add_age
+        address_cells[0].paragraphs[0].style='normal_style'
+        address_cells[0].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        address_cells[0].paragraphs[0].paragraph_format.space_before = Pt(0)
+        address_cells[0].paragraphs[0].paragraph_format.space_after = Pt(0)
+        add_value = '-'
+
+        if selected_fossil.fossil_value:
+            add_value = str(selected_fossil.fossil_value)
+        address_cells[1].text = add_value
+        address_cells[1].paragraphs[0].style='normal_style'
+        address_cells[1].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        address_cells[1].paragraphs[0].paragraph_format.space_before = Pt(0)
+        address_cells[1].paragraphs[0].paragraph_format.space_after = Pt(0)
+
+        if selected_fossil.fossil_description_short:
+            tx = re.sub('[\t]+', ' ', strip_tags(selected_fossil.fossil_description_short))
+            tx.replace('\n ', '\n').strip()
+            note_par = document.add_paragraph('', style='normal_style')
+            note_par.add_run(f'Note: ').bold=True
+            note_par.add_run(f'{tx}').bold=False
+            note_par.paragraph_format.space_before = Pt(5)
+            note_par.paragraph_format.space_after = Pt(0)
+
+        separator_line = document.add_paragraph('________________________________________________________________________________________________________________', style='normal_style')
+        separator_line.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 
+    fossils = DBFossil.objects.filter(fossil_owner=request.user)
+    document = Document()
+
+    section = document.sections[0]
+    section.page_height = Mm(297)
+    section.page_width = Mm(210)
+    section.left_margin = Mm(5)
+    section.right_margin = Mm(5)
+    section.top_margin = Mm(5)
+    section.bottom_margin = Mm(5)
+    section.header_distance = Mm(0)
+    section.footer_distance = Mm(0)
+
+    style = document.styles['Normal']
+    font = style.font
+    font.name = 'Times New Roman'
+    font.size = Pt(9)
+    styles = document.styles
+
+    style_title = styles.add_style('title_style', WD_STYLE_TYPE.PARAGRAPH)
+    font_style_title = style_title.font
+    font.name = 'Times New Roman'
+    font_style_title.size = Pt(18)
+    font_style_title.color.rgb = RGBColor(56, 118, 29)
+    font_style_title.bold = True
+
+    style_big_header = styles.add_style('big_header_style', WD_STYLE_TYPE.PARAGRAPH)
+    font_style_big_header = style_big_header.font
+    font_style_big_header.name = 'Times New Roman'
+    font_style_big_header.size = Pt(14)
+    font_style_big_header.bold = True
+
+    style_normal = styles.add_style('normal_style', WD_STYLE_TYPE.PARAGRAPH)
+    font_style_normal = style_normal.font
+    font_style_normal.name = 'Times New Roman'
+    font_style_normal.size = Pt(10)
+    font_style_normal.bold = False
+
+    for fossil in fossils:
+        print_fossil(fossil)
+
+    docx_title = f'Fossils.docx'
+    doc_file = io.BytesIO()
+    document.save(doc_file)
+    length = doc_file.tell()
+    doc_file.seek(0)
+    response = HttpResponse(doc_file.getvalue(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = 'attachment; filename=' + docx_title
+    response['Content-Length'] = length
+    return response
 

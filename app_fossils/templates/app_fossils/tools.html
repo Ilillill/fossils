@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %} Tools {% endblock %}
+{% load static %}
+{% block content %}
+
+<div class="text-center mt-4">
+    <a class="btn btn-sm btn-outline-secondary mb-2 w-50" href="{% url 'select-image' %}">Image as selection</a><br>
+    <a class="btn btn-sm btn-outline-secondary mb-2 w-50" href="{% url 'my-text' %}">HTTPResponse Text</a><br>
+    <a class="btn btn-sm btn-outline-secondary mb-2 w-50" href="{% url 'my-html' %}">HTTPResponse HTML</a><br>
+    <a class="btn btn-sm btn-outline-secondary mb-2 w-50" href="{% url 'about' %}">About (access html directly from urls.py)</a><br>
+</div>
+
+{% endblock %}
+
+

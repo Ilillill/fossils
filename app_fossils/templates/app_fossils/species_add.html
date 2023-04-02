@@ -3,6 +3,8 @@
 {% load static %}
 {% block content %}
 
+<h2 class="text-center">Option 1: form as_p</h2>
+
 <div class="container" style="max-width: 700px;">
     <div class="card mt-3 text-center">
         <h5 class="card-header">Add a new species</h5>
@@ -11,6 +13,32 @@
                 {% csrf_token %}
                 {{ form_species_add.as_p }}
                 {{ form_species_add.media }}
+                <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'homepage' %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<br><hr><br>
+<h2 class="text-center">Option 2: add individual fields separately</h2>
+
+<div class="container" style="max-width: 700px;">
+    <div class="card mt-3 text-center">
+        <h5 class="card-header">Add a new species</h5>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_species_add.media }}
+                {{ form_species_add.species_name }}
+                <div class="row mt-3">
+                    <div class="col col-4"><strong>File</strong>{{ form_species_add.species_image }}
+                        <br><br>{{ form_species_add.species_is_archived }} archived
+                        <br><br>{{ form_species_add.captcha }}
+                    </div>
+                    <div class="col col-8"><strong>Description</strong>{{ form_species_add.species_description }}</div>
+                </div>
+                <br>
                 <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" href="{% url 'homepage' %}">Cancel</a>
             </form>
         </div>

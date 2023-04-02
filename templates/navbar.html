@@ -15,7 +15,7 @@
           <li class="nav-item"><a class="nav-link {% if nv == 'events' %}active{% endif %}" href="{% url 'events' %}">Events</a></li>
           
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Charts</a>
+            <a class="nav-link dropdown-toggle {% if nv == 'chart_simple' or nv == 'chart_multi' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Charts</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item {% if nv == 'chart_simple' %}active{% endif %}" href="{% url 'chart-simple' %}">Simple chart</a></li>
               <li><a class="dropdown-item {% if nv == 'chart_multi' %}active{% endif %}" href="{% url 'chart-multi' %}">Multi chart</a></li>
@@ -33,7 +33,18 @@
             </li>
           {% endif %}
 
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if nv == 'print_csv' or nv == 'print_pdf' or nv == 'print_word' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Print</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item {% if nv == 'print_csv' %}active{% endif %}" href="{% url 'print-csv' %}">CSV</a></li>
+              <li><a class="dropdown-item {% if nv == 'print_pdf' %}active{% endif %}" href="{% url 'print-pdf' %}">PDF</a></li>
+              <li><a class="dropdown-item {% if nv == 'print_word' %}active{% endif %}" href="{% url 'print-word' %}">Word</a></li>
+              
+            </ul>
+          </li>
+
           <li class="nav-item"><a class="nav-link" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">Search</a></li>
+          <li class="nav-item"><a class="nav-link {% if nv == 'tools' %}active{% endif %}" href="{% url 'tools-display' %}">Tools</a></li>
 
 
       </ul>
