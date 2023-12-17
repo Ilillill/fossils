@@ -1,5 +1,4 @@
 {% load navbar_tags %}
-
 <nav class="navbar navbar-expand bg-body-tertiary">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,7 +12,6 @@
           <li class="nav-item"><a class="nav-link {% if nv == 'fossil_add' %}active{% endif %}" href="{% url 'fossil-add' %}">➕ fossil</a></li>
           <li class="nav-item"><a class="nav-link {% if nv == 'gatherings' %}active{% endif %}" href="{% url 'gatherings' %}">Gathering</a></li>
           <li class="nav-item"><a class="nav-link {% if nv == 'events' %}active{% endif %}" href="{% url 'events' %}">Events</a></li>
-          
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle {% if nv == 'chart_simple' or nv == 'chart_multi' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Charts</a>
             <ul class="dropdown-menu">
@@ -21,7 +19,6 @@
               <li><a class="dropdown-item {% if nv == 'chart_multi' %}active{% endif %}" href="{% url 'chart-multi' %}">Multi chart</a></li>
             </ul>
           </li>
-
           {% if user_species %}
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Species</a>
@@ -32,21 +29,16 @@
               </ul>
             </li>
           {% endif %}
-
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle {% if nv == 'print_csv' or nv == 'print_pdf' or nv == 'print_word' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Print</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item {% if nv == 'print_csv' %}active{% endif %}" href="{% url 'print-csv' %}">CSV</a></li>
               <li><a class="dropdown-item {% if nv == 'print_pdf' %}active{% endif %}" href="{% url 'print-pdf' %}">PDF</a></li>
               <li><a class="dropdown-item {% if nv == 'print_word' %}active{% endif %}" href="{% url 'print-word' %}">Word</a></li>
-              
             </ul>
           </li>
-
           <li class="nav-item"><a class="nav-link" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">Search</a></li>
           <li class="nav-item"><a class="nav-link {% if nv == 'tools' %}active{% endif %}" href="{% url 'tools-display' %}">Tools</a></li>
-
-
       </ul>
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link rounded shadow {% if nv == 'user_profile' %}btn border-primary{% endif %}" href="{% url 'profile' %}">
@@ -59,7 +51,6 @@
             </svg>
           </a></li>
       </ul>
-          
         {% else %}
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
@@ -68,8 +59,6 @@
     </div>
   </div>
 </nav>
-
-
 
 <div class="container">
 <div class="collapse" id="collapseSearch">

@@ -3,9 +3,6 @@
 {% load static %}
 {% block content %}
 
-
-
-
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#AddEventModal">➕ event</a>
   
   <div class="modal fade" id="AddEventModal" tabindex="-1" aria-labelledby="AddEventModalLabel" aria-hidden="true">
@@ -19,25 +16,17 @@
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-
-        
-        
             <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
           </form>
         </div>
       </div>
     </div>
   </div>
-
-
-
 <hr>
 
 <h2 class="text-center mb-4">Events</h2>
-
 <table class="table table-hover table-sm" style="font-size: small;">
   <thead>
-
     <tr>
       <th scope="col">Event</th>
       <th scope="col">Date</th>
@@ -51,14 +40,8 @@
       <td>{{ event.event_date|date:'Y.m.d' }}</td>
       <td>{{ event.fossils.all.count }}</td>
     </tr>
-
   {% endfor %}
   </tbody>
 </table>
 
-
-
-
 {% endblock %}
-
-

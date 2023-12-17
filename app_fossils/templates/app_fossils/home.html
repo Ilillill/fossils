@@ -29,7 +29,6 @@
         {% endfor %}
       </ul>
     </li>
-    
     {% if species.has_next %}
       <li class="page-item"><a class="page-link" href="?page={{ species.next_page_number }}">&gt;</a></li>
       <li class="page-item"><a class="page-link" href="?page={{ species.paginator.num_pages }}">&gt;&gt;</a></li>
@@ -40,14 +39,11 @@
   </ul>
 </nav>
 
-
-
 {% if fossils_without_specie %}
   <a class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="offcanvas" href="#offcanvasNoSpecie" role="button" aria-controls="offcanvasNoSpecie">
     Fossil{{ fossils_without_specie.count|pluralize }} without species
     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ fossils_without_specie.count }}</span>
   </a>
-
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNoSpecie" aria-labelledby="offcanvasNoSpecieLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasNoSpecieLabel">Fossils without species</h5>
@@ -60,10 +56,7 @@
     </div>
   </div>
 {% endif %}
-
-
 <hr>
-
 {% if species %}
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 h-100 g-3" data-masonry='{"percentPosition": true }'>
     {% for specie in species %}
@@ -71,32 +64,25 @@
         <div class="card p-0 border-0 shadow h-100" style="width: 100%; height: 100%;">
           <div class="container card-header p-0 shadow-sm bg-white" style="position: relative; display: flex; align-items: center; justify-content: center;">
             <a href="{% url 'species-selected' specie.id %}">
-
               <img {% if specie.species_image %}src="{{ specie.species_image.url }}"{% else %}src="{% static 'project/default.png' %}"{% endif %} alt="..." class="img-fluid rounded-0">
-
               <div style="position: absolute; top: 4px; left: 8px;">
                 <span class="badge bg-light text-black"> {{ specie.calculate_number_of_fossils }}</span>
               </div>
-              
               <div style="position: absolute; top: 4px;  right: 8px;">
                 {% if specie.species_is_archived %}🔴{% else %}🟢{% endif %}
               </div>
-              
               {% if specie.total_fossil_value != 0 %}
                 <div style="position: absolute; bottom: 4px;  left: 8px;">
                   <span class="badge bg-dark text-white">£ {{ specie.total_fossil_value }}</span>
                 </div>
               {% endif %}
-              
               {% if specie.species_description %}
                 <div style="position: absolute; bottom: 4px; right: 8px;">
                   <span class="badge bg-dark">📝</span>
                 </div>
               {% endif %}
-
             </a>
           </div>
-          
           <div class="card-body p-0 h-100">
             <small style="font-weight: bold;">
               <a href="{% url 'species-selected' specie.id %}" style="text-decoration: none; color: black;">{{ specie.species_name }}</a>
@@ -106,21 +92,8 @@
       </div>
     {% endfor %}
   </div>
-
-
-
 {% endif %}
-
-
-
-
-
-
-
 {% endblock %}
-
 {% block footer %}
 <h6 class="text-center">Fossils </h6>
 {% endblock %}
-
-

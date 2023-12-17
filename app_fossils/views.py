@@ -583,7 +583,7 @@ def fossil_event_return(request, pk):
 
 @login_required
 def tools(request):
-    return render(request, 'app_fossils/tools.html', {"nv": "tools"})
+    return render(request, 'app_fossils/tools.html', {"nv": "tools",})
 
 
 ####################################################
@@ -603,6 +603,9 @@ def select_image(request):
     return render(request, 'app_fossils/select_image.html', {'form': form})
 
 
+###################################################
+##########    H T T P R E S P O N S E    ##########
+###################################################
 
 
 def my_text(request):
@@ -635,6 +638,12 @@ def timeline(request):
         "nv":"timeline",
     })
 
+
+#####################################
+##########    P R I N T    ##########
+#####################################
+
+
 import csv
 
 @login_required
@@ -661,7 +670,8 @@ from docx.enum.style import WD_STYLE_TYPE
 from django.utils.html import strip_tags
 from docx.shared import RGBColor
 import io
-        
+
+
 @login_required
 def print_word(request):
     def print_fossil(selected_fossil):

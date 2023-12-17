@@ -32,7 +32,6 @@ urlpatterns = [
 
     path('select_image/', select_image, name='select-image'),
 
-
     path('my_text/', my_text, name='my-text'),
     path('my_html/', my_html, name='my-html'),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),

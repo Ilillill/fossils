@@ -3,9 +3,7 @@
 {% load static %}
 {% block content %}
 
-
 <h2 class="text-center mb-4">CUSTOM PROFILE MODEL</h2>
-
 
 <ul>
     <li><strong>User</strong>: {{ user.profile.user }}</li>
@@ -31,8 +29,6 @@
     </div>
 </div>
 
-
-
 <br><hr><br>
 <h2 class="text-center mb-4">AllAuth shortcuts</h2>
 
@@ -43,7 +39,6 @@
     <li><strong>Reset password</strong>: <a href="{% url 'account_reset_password' %}" style="text-decoration: none;">account_reset_password</a></li>
     <li><strong>Update email</strong>: <a href="{% url 'account_email' %}" style="text-decoration: none;">account_email</a></li>
 </ul>
-
 
 <br><hr><br>
 <h2 class="text-center mb-4">Built-In Django USER MODEL</h2>
@@ -77,11 +72,4 @@
     </div>
 </div>
 
-
-
-
-
-
-
 {% endblock %}
-

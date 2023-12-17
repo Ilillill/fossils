@@ -3,8 +3,6 @@
 {% load static %}
 {% block content %}
 
-
-
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#FossilEventAddModal">Add fossil</a>
   
   <div class="modal fade" id="FossilEventAddModal" tabindex="-1" aria-labelledby="FossilEventAddModalLabel" aria-hidden="true">
@@ -24,7 +22,6 @@
       </div>
     </div>
   </div>
-
 
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#Update_Popup_Modal">Update event</a>
 
@@ -48,10 +45,6 @@
 
 <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete event</a>
 
-
-
-
-
 <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -72,15 +65,9 @@
         </div>
     </div>
 </div>
-
-
 <hr>
-
 <h2 class="text-center">{{ event.event_name }}</h2>
 <p class="text-center mb-4" style="font-size: small;">{{ event.event_date|date:'Y.m.d' }}</p>
-
-
-
 
 {% if fossils %}
 <table class="table table-hover table-sm" style="font-size: small;">
@@ -111,12 +98,10 @@
   </table>
 {% endif %}
 
-
 {% if event.event_notes %}
   <hr>
   <p><strong>Notes</strong>: {{ event.event_notes|linebreaks }}</p>
   <br>
 {% endif %}
-
 
 {% endblock %}

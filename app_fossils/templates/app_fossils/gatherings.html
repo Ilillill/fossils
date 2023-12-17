@@ -3,11 +3,7 @@
 {% load static %}
 {% block content %}
 
-
-
-
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#AddGatheringModal">➕ gathering</a>
-
 <a class="btn btn-sm btn-outline-secondary" href="{% url 'timeline-show' %}">Timeline</a><br>
   
   <div class="modal fade" id="AddGatheringModal" tabindex="-1" aria-labelledby="AddGatheringModalLabel" aria-hidden="true">
@@ -21,20 +17,15 @@
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form_gathering_add.as_p }}
-
-      
             <button class="save btn btn-sm btn-outline-secondary" type="submit">Add</button> <a class="btn btn-sm btn-outline-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Cancel</a>
           </form>
         </div>
       </div>
     </div>
   </div>
-
-
-
 <hr>
-<h2 class="text-center mb-4">Gathering events</h2>
 
+<h2 class="text-center mb-4">Gathering events</h2>
 
 {% if user_gatherings %}
   <table class="table table-hover table-sm table-responsive" style="font-size: small;">
@@ -54,32 +45,19 @@
       <tbody>
       {% for gathering in user_gatherings %}
         <tr>
-          
           <td><a href="{% url 'gathering-selected' gathering.id %}" style="text-decoration: none;">{{ gathering.gathering_name }}</a></td>
-
-        <td>{{ gathering.gathering_date|date:'Y.m.d' }}</td>
-
-        <td>{% if gathering.gathering_image %}
-          <img src="{{ gathering.gathering_image.url }}" alt="" style="max-width: 30px; max-height: 20px;">
-          {% else %} - {% endif %}</td>
-
-        <td>{{ gathering.gathering_description|default:'-' }}</td>
-        <td>{{ gathering.gathering_location|default:'-' }}</td>
-        <td>{{ gathering.gathering_location_geological_time|default:'-' }}</td>
-        <td>{{ gathering.gathering_duration|default:'-' }}</td>
-        <td>{% if gathering.gathering_pdf %}🟢{% else %}🔴{% endif %}</td>
-        <td>{{ gathering.gathering_slug }}</td>
-
-
+          <td>{{ gathering.gathering_date|date:'Y.m.d' }}</td>
+          <td>{% if gathering.gathering_image %}<img src="{{ gathering.gathering_image.url }}" alt="" style="max-width: 30px; max-height: 20px;">{% else %} - {% endif %}</td>
+          <td>{{ gathering.gathering_description|default:'-' }}</td>
+          <td>{{ gathering.gathering_location|default:'-' }}</td>
+          <td>{{ gathering.gathering_location_geological_time|default:'-' }}</td>
+          <td>{{ gathering.gathering_duration|default:'-' }}</td>
+          <td>{% if gathering.gathering_pdf %}🟢{% else %}🔴{% endif %}</td>
+          <td>{{ gathering.gathering_slug }}</td>
         </tr>
-
       {% endfor %}
       </tbody>
     </table>
 {% endif %}
 
-
-
 {% endblock %}
-
-

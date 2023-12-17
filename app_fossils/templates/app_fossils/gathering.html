@@ -3,7 +3,6 @@
 {% load static %}
 {% block content %}
 
-
 <a class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#UpdateGatheringModal">Update</a>
   
   <div class="modal fade" id="UpdateGatheringModal" tabindex="-1" aria-labelledby="UpdateGatheringModalLabel" aria-hidden="true">
@@ -25,18 +24,7 @@
     </div>
   </div>
 
-
-
-
-
-
-
-
 <a class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#Delete_Popup_Modal">Delete</a>
-
-
-
-
 <div class="modal fade" id="Delete_Popup_Modal" tabindex="-1" aria-labelledby="Delete_Popup_ModalLabel" aria-hidden="true">
   <div class="modal-dialog">
       <div class="modal-content">
@@ -57,8 +45,6 @@
       </div>
   </div>
 </div>
-
-
 <hr>
 
 <h2 class="text-center mb-4">Gathering in {{ gathering.gathering_name }} on {{ gathering.gathering_date|date:'Y.m.d' }}</h2>
@@ -70,13 +56,10 @@
   {% else %} - {% endif %}</p>
 <p><strong>Description</strong>: {{ gathering.gathering_description|default:'-' }}</p>
 <p><strong>Location</strong>: {{ gathering.gathering_location|default:'-' }}</p>
-
-
 <p><strong>Geological Time</strong>: {{ gathering.gathering_location_geological_time|default:'-' }}</p>
 <p><strong>Duration</strong>: {{ gathering.gathering_duration|default:'-' }}</p>
 <p><strong>PDF</strong>: {% if gathering.gathering_pdf %} <a href="{{ gathering.gathering_pdf.url }}" style="text-decoration: none;" target="_blank">⬇️</a> {% else %}🔴{% endif %}</p>
 <p><strong>Slug</strong>: {{ gathering.gathering_slug }}</p>
-
 <p><strong>Fossils gathered:</strong></p>
 
 <ul>
@@ -85,7 +68,4 @@
   {% endfor %}
 </ul>
 
-
 {% endblock %}
-
-
